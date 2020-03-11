@@ -45,6 +45,7 @@ http.listen(process.env.PORT, function(){
 
 let background = [], foreground = [], bots = []
 let coordX = 0, coordY = 0
+let spawnX = 49, spawnY = 49
 for (let i = 0; i < 100; i++) {
     for (let x = 0; x < 100; x++) {
         background.push({x:coordX,y:coordY,color:"red"})
@@ -84,7 +85,7 @@ io.on('connection', function(socket){
             background[i]['color'] = colors[randomIndexOfColor]
         }
         randomIndexOfColor = Math.floor(Math.random() * colors.length)
-        socket.emit('updateMap', {map:background,name:'background'})
+        socket.emit('updateMap', {map:background, name:'background'})
     }, 1000)
 
     //for testing later automatic by code from clients
@@ -128,7 +129,7 @@ io.on('connection', function(socket){
 
 function checkOnDuplicateName(data, attempt, socket){
     if(bots.map(function(e) { return e.name; }).indexOf(data) == -1){
-        bots.push({name:data, x:49, y:49, owner:data, socket:socket})
+        bots.push({name:data, x:spawnX, y:spawnY, owner:data, socket:socket})
         socket.emit('changedNameTo', data)
     }
     else{
