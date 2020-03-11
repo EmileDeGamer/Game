@@ -9,6 +9,13 @@
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
-    <canvas id="c"></canvas>
+    <div style="position: relative;">
+        <canvas id="layer1" style="position: absolute; z-index: 0;"></canvas>
+        <canvas id="layer2" style="position: absolute; z-index: 1;"></canvas>
+    </div>
+    <button id="w">w</button>
+    <button id="a">a</button>
+    <button id="s">s</button>
+    <button id="d">d</button>
 </body>
 </html>

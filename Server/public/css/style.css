@@ -7,7 +7,13 @@ body {
           user-select: none;
 }
 
+button {
+  margin: 10px;
+  float: left;
+}
+
 canvas {
+  left: 30%;
   border: 5px solid black;
 }
 /*# sourceMappingURL=style.css.map */

@@ -39,22 +39,22 @@ http.listen(process.env.PORT, function(){
     console.log("listening on " + process.env.PORT)
 })
 
-let map = []
+let background = [], foreground = [], bots = []
 let coordX = 0, coordY = 0
 for (let i = 0; i < 100; i++) {
     for (let x = 0; x < 100; x++) {
-        map.push({x:coordX,y:coordY,color:"white"})
+        background.push({x:coordX,y:coordY,color:"red"})
         coordX++
     }
     coordY++
     coordX=0
 }
-for (let i = 0; i < 100; i++) {
-    map[i]['color'] = 'red'
-    map[i+9900]['color'] = 'red'
-    map[i*100]['color'] = 'red'
-    map[i*100+99]['color'] = 'red'
-}
+/*for (let i = 0; i < 100; i++) {
+    background[i]['color'] = 'red'
+    background[i+9900]['color'] = 'red'
+    background[i*100]['color'] = 'red'
+    background[i*100+99]['color'] = 'red'
+}*/
 
 let colors = ['red', 'orange', 'yellow', 'green', 'lightblue', 'blue', 'purple', 'pink']
 
@@ -63,17 +63,59 @@ let randomIndexOfColor = Math.floor(Math.random() * colors.length)
 io.on('connection', function(socket){
     console.log('connection made!')  
 
-    socket.emit('updateMap', map)
-
     socket.on('disconnect', function(){
         console.log('disconnected! :(')
     })
+
+    socket.on('createMe', function(data){
+        checkOnDuplicateName(data, 0, socket)
+        io.emit('updateMap', {map:background,name:'background'})
+    })
  
     /*setInterval(() => {
-        for (let i = 0; i < map.length; i++) {
-            map[i]['color'] = colors[randomIndexOfColor]
+        for (let i = 0; i < background.length; i++) {
+            background[i]['color'] = colors[randomIndexOfColor]
         }
         randomIndexOfColor = Math.floor(Math.random() * colors.length)
-        socket.emit('updateMap', map)
+        socket.emit('updateMap', background)
     }, 1000)*/
+
+    socket.on('move', function(data){
+        for (let i = 0; i < bots.length; i++) {
+            if(bots[i]['name'] == data['name']){
+                if(data['direction'] == "w"){
+                    bots[i]['y']--
+                }
+                else if (data['direction'] == "a"){
+                    bots[i]['x']--
+                }
+                else if (data['direction'] == "s"){
+                    bots[i]['y']++
+                }
+                else if (data['direction'] == "d"){
+                    bots[i]['x']++
+                }
+            }
+        }
+    })
+
+    setInterval(() => {
+        foreground = []
+        for (let x = 0; x < bots.length; x++) {
+            foreground.push({x:bots[x]['x'], y:bots[x]['y'], color:'black', name:bots[x]['name']})
+        }
+        io.emit('updateMap', {map:foreground, name:'foreground'})
+    }, 1000/60)
 })
+
+function checkOnDuplicateName(data, attempt, socket){
+    if(bots.indexOf(data) == -1){
+        bots.push({name:data, x:49, y:49, owner:data})
+        socket.emit('changedNameTo', data)
+    }
+    else{
+        let newName = data + attempt
+        attempt++
+        checkOnDuplicateName(newName, attempt, socket)
+    }
+}
