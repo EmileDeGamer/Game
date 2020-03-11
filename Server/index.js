@@ -1,4 +1,6 @@
 //needs to send the real time view to the client
+//initializing things i need
+//#region 
 let express = require("express")
 let app = express()
 let http = require('http').createServer(app)
@@ -39,6 +41,8 @@ http.listen(process.env.PORT, function(){
     console.log("listening on " + process.env.PORT)
 })
 
+//#endregion
+
 let background = [], foreground = [], bots = []
 let coordX = 0, coordY = 0
 for (let i = 0; i < 100; i++) {
@@ -65,6 +69,9 @@ io.on('connection', function(socket){
 
     socket.on('disconnect', function(){
         console.log('disconnected! :(')
+        if(bots.map(function(e) { return e.socket; }).indexOf(socket) != -1){
+            bots.splice(bots.map(function(e) { return e.socket; }).indexOf(socket))
+        }
     })
 
     socket.on('createMe', function(data){
@@ -72,50 +79,59 @@ io.on('connection', function(socket){
         io.emit('updateMap', {map:background,name:'background'})
     })
  
-    /*setInterval(() => {
+    setInterval(() => {
         for (let i = 0; i < background.length; i++) {
             background[i]['color'] = colors[randomIndexOfColor]
         }
         randomIndexOfColor = Math.floor(Math.random() * colors.length)
-        socket.emit('updateMap', background)
-    }, 1000)*/
+        socket.emit('updateMap', {map:background,name:'background'})
+    }, 1000)
 
+    //for testing later automatic by code from clients
+    //#region optional
     socket.on('move', function(data){
         for (let i = 0; i < bots.length; i++) {
             if(bots[i]['name'] == data['name']){
                 if(data['direction'] == "w"){
-                    bots[i]['y']--
+                    if(bots[i]['y'] !== 0){
+                        bots[i]['y']--
+                    }
                 }
                 else if (data['direction'] == "a"){
-                    bots[i]['x']--
+                    if(bots[i]['x'] !== 0){
+                        bots[i]['x']--
+                    }
                 }
                 else if (data['direction'] == "s"){
-                    bots[i]['y']++
+                    if(bots[i]['y'] !== 99){
+                        bots[i]['y']++
+                    }
                 }
                 else if (data['direction'] == "d"){
-                    bots[i]['x']++
+                    if(bots[i]['x'] !== 99){
+                        bots[i]['x']++
+                    }
                 }
             }
         }
     })
+    //#endregion
 
     setInterval(() => {
         foreground = []
         for (let x = 0; x < bots.length; x++) {
-            foreground.push({x:bots[x]['x'], y:bots[x]['y'], color:'black', name:bots[x]['name']})
+            foreground.push({x:bots[x]['x'], y:bots[x]['y'], color:'black', name:bots[x]['name'], owner:bots[x]['owner']})
         }
         io.emit('updateMap', {map:foreground, name:'foreground'})
-    }, 1000/60)
+    }, 1000/30)
 })
 
 function checkOnDuplicateName(data, attempt, socket){
-    if(bots.indexOf(data) == -1){
-        bots.push({name:data, x:49, y:49, owner:data})
+    if(bots.map(function(e) { return e.name; }).indexOf(data) == -1){
+        bots.push({name:data, x:49, y:49, owner:data, socket:socket})
         socket.emit('changedNameTo', data)
     }
     else{
-        let newName = data + attempt
-        attempt++
-        checkOnDuplicateName(newName, attempt, socket)
+        checkOnDuplicateName(data + attempt++, attempt++, socket)
     }
 }
