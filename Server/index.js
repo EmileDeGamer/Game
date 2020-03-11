@@ -43,6 +43,8 @@ http.listen(process.env.PORT, function(){
 
 //#endregion
 
+let Bot = require("./classes/botBase")
+
 let background = [], foreground = [], bots = []
 let coordX = 0, coordY = 0
 let spawnX = 49, spawnY = 49
@@ -80,13 +82,13 @@ io.on('connection', function(socket){
         io.emit('updateMap', {map:background,name:'background'})
     })
  
-    setInterval(() => {
+    /*setInterval(() => {
         for (let i = 0; i < background.length; i++) {
             background[i]['color'] = colors[randomIndexOfColor]
         }
         randomIndexOfColor = Math.floor(Math.random() * colors.length)
         socket.emit('updateMap', {map:background, name:'background'})
-    }, 1000)
+    }, 1000)*/
 
     //for testing later automatic by code from clients
     //#region optional
@@ -129,7 +131,8 @@ io.on('connection', function(socket){
 
 function checkOnDuplicateName(data, attempt, socket){
     if(bots.map(function(e) { return e.name; }).indexOf(data) == -1){
-        bots.push({name:data, x:spawnX, y:spawnY, owner:data, socket:socket})
+        let bot = new Bot(data, spawnX, spawnY, data, socket)
+        bots.push(bot)
         socket.emit('changedNameTo', data)
     }
     else{
