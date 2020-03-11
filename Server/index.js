@@ -63,9 +63,8 @@ for (let i = 0; i < 100; i++) {
     background[i*100+99]['color'] = 'red'
 }*/
 
-let colors = ['red', 'orange', 'yellow', 'green', 'lightblue', 'blue', 'purple', 'pink']
-
-let randomIndexOfColor = Math.floor(Math.random() * colors.length)
+//let colors = ['red', 'orange', 'yellow', 'green', 'lightblue', 'blue', 'purple', 'pink']
+//let randomIndexOfColor = Math.floor(Math.random() * colors.length)
 
 io.on('connection', function(socket){
     console.log('connection made!')  
@@ -90,7 +89,7 @@ io.on('connection', function(socket){
         socket.emit('updateMap', {map:background, name:'background'})
     }, 1000)*/
 
-    //for testing later automatic by code from clients
+    //movement for testing later automatic by code from clients
     //#region optional
     socket.on('move', function(data){
         for (let i = 0; i < bots.length; i++) {
