@@ -49,7 +49,16 @@ for (let i = 0; i < 100; i++) {
     coordY++
     coordX=0
 }
-map[0]['color'] = 'red';
+for (let i = 0; i < 100; i++) {
+    map[i]['color'] = 'red'
+    map[i+9900]['color'] = 'red'
+    map[i*100]['color'] = 'red'
+    map[i*100+99]['color'] = 'red'
+}
+
+let colors = ['red', 'orange', 'yellow', 'green', 'lightblue', 'blue', 'purple', 'pink']
+
+let randomIndexOfColor = Math.floor(Math.random() * colors.length)
 
 io.on('connection', function(socket){
     console.log('connection made!')  
@@ -59,7 +68,12 @@ io.on('connection', function(socket){
     socket.on('disconnect', function(){
         console.log('disconnected! :(')
     })
+ 
+    /*setInterval(() => {
+        for (let i = 0; i < map.length; i++) {
+            map[i]['color'] = colors[randomIndexOfColor]
+        }
+        randomIndexOfColor = Math.floor(Math.random() * colors.length)
+        socket.emit('updateMap', map)
+    }, 1000)*/
 })
-
-
-

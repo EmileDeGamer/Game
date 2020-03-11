@@ -4,12 +4,6 @@ body{
     user-select: none;
 }
 
-#bord{
-    display: inline-grid;
+canvas{
     border: 5px solid black;
-    box-sizing: border-box;
-}
-
-span{
-    font-size: 0;
 }

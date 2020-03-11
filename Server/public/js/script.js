@@ -1,4 +1,4 @@
-let bord = document.getElementById('bord')
+/*let bord = document.getElementById('bord')
 bord.style.gridTemplateColumns = "repeat(100, 5px)"
 bord.style.gridTemplateRows = "repeat(100, 5px)"
 
@@ -19,7 +19,9 @@ for (let i = 0; i < 100; i++) {
 function changeMapOnPos(color, pos){
     for (let i = 0; i < bord.childNodes.length; i++) {
         if(bord.childNodes[i].innerHTML == pos){
-            bord.childNodes[i].style.backgroundColor = color
+            if(bord.childNodes[i].style.backgroundColor != color){
+                bord.childNodes[i].style.backgroundColor = color
+            }
             break
         }
     }
@@ -43,8 +45,8 @@ setInterval(() => {
         changeMapOnPos(colors[randomIndex], "99:" + i)
     }
     randomIndex = Math.floor(Math.random() * colors.length)
-}, 1000);*/
-
+}, 1000);
+*/
 let socket = io()
 
 socket.on('connect', function(){
@@ -53,6 +55,17 @@ socket.on('connect', function(){
 
 socket.on('updateMap', function(map){
     for (let i = 0; i < map.length; i++) {
-        changeMapOnPos(map[i]['color'], map[i]['x'] + ":" + map[i]['y'])
+        ctx.fillStyle = map[i]['color']
+        ctx.fillRect(map[i]['x']*10,map[i]['y']*10,10,10)
     }
 })
+
+let canvas = document.getElementById('c')
+let ctx = canvas.getContext('2d')
+
+init()
+
+function init () {
+    canvas.width = 100*10
+    canvas.height = 100*10
+}

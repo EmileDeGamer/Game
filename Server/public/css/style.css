@@ -7,15 +7,7 @@ body {
           user-select: none;
 }
 
-#bord {
-  display: -ms-inline-grid;
-  display: inline-grid;
+canvas {
   border: 5px solid black;
-  -webkit-box-sizing: border-box;
-          box-sizing: border-box;
-}
-
-span {
-  font-size: 0;
 }
 /*# sourceMappingURL=style.css.map */
