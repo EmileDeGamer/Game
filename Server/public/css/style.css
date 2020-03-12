@@ -29,6 +29,14 @@ button {
   text-align: left;
 }
 
+#selectedDisplay {
+  position: absolute;
+  left: 25px;
+  top: 25%;
+  float: left;
+  text-align: left;
+}
+
 canvas {
   left: 30%;
   border: 5px solid black;

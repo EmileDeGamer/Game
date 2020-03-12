@@ -131,14 +131,13 @@ io.on('connection', function(socket){
     setInterval(() => {
         foreground = []
         for (let i = 0; i < generators.length; i++) {
-            console.log(generators[i].getEnergy())
             foreground.push({x:generators[i]['x'], y:generators[i]['y'], color:generators[i]['color'], generationInterval:generators[i]['generationInterval'], maxEnergy:generators[i]['maxEnergy'], currentEnergy:generators[i]['currentEnergy']})
         }
         for (let x = 0; x < bots.length; x++) {
             foreground.push({x:bots[x]['x'], y:bots[x]['y'], color:'black', name:bots[x]['name'], owner:bots[x]['owner']})
         }
         io.emit('updateMap', {map:foreground, name:'foreground'})
-    }, 1000)
+    }, 1000/60)
 })
 
 function checkOnDuplicateName(data, attempt, socket){

@@ -45,24 +45,57 @@ let hovergroundMap = []
 
 let hoveredEntityDisplay = document.getElementById('hoveredEntityDisplay')
 let hoverDisplay = document.getElementById('hoverDisplay')
+let selectedDisplay = document.getElementById('selectedDisplay')
+
+let pieceSize = 10 //in pixels
+let maxX = 99
+let maxY = 99
+let mapSizeX = maxX + 1
+let mapSizeY = maxY + 1
 
 init()
 
 function init () {
-    let mapSize = 100
-    let pieceSize = 10 //in pixels
-    background.width = mapSize*pieceSize
-    background.height = mapSize*pieceSize
-    foreground.width = mapSize*pieceSize
-    foreground.height = mapSize*pieceSize
-    hoverground.width = mapSize*pieceSize
-    hoverground.height = mapSize*pieceSize
+    
+    
+    background.width = mapSizeX*pieceSize
+    background.height = mapSizeY*pieceSize
+    foreground.width = mapSizeX*pieceSize
+    foreground.height = mapSizeY*pieceSize
+    hoverground.width = mapSizeX*pieceSize
+    hoverground.height = mapSizeY*pieceSize
 }
 
 let buttons = [document.getElementById('w'), document.getElementById('a'), document.getElementById('s'), document.getElementById('d')]
 
 for (let i = 0; i < buttons.length; i++) {
     buttons[i].onclick = function(){socket.emit('move', {direction:buttons[i].innerHTML,name:botname})}
+}
+
+hoverground.onmousedown = function (e) {
+    var rect = this.getBoundingClientRect(),
+    x = e.clientX - rect.left,
+    y = e.clientY - rect.top,
+    i = 0, r;
+    let roundedX = Math.floor(x / 10)
+    let roundedY = Math.floor(y / 10)
+    if(roundedX > maxX){
+        roundedX = maxX
+    }
+    if(roundedY > maxY){
+        roundedY = maxY
+    }
+    for (let i = 0; i < foregroundMap.length; i++) {
+        if(typeof foregroundMap[i] !== 'undefined'){
+            if(foregroundMap[i]['x'] == roundedX && foregroundMap[i]['y'] == roundedY){
+                selectedDisplay.innerHTML = JSON.stringify(foregroundMap[i])
+                break
+            }
+            else{
+                selectedDisplay.innerHTML = ''
+            }
+        }
+    }
 }
 
 hoverground.onmousemove = function (e) {
@@ -72,6 +105,12 @@ hoverground.onmousemove = function (e) {
     i = 0, r;
     let roundedX = Math.floor(x / 10)
     let roundedY = Math.floor(y / 10)
+    if(roundedX > maxX){
+        roundedX = maxX
+    }
+    if(roundedY > maxY){
+        roundedY = maxY
+    }
     hoverDisplay.innerHTML = "X: " + roundedX + " Y: " + roundedY
     for (let i = 0; i < backgroundMap.length; i++) {
         if(backgroundMap[i]['x'] == roundedX && backgroundMap[i]['y'] == roundedY){
@@ -88,7 +127,7 @@ hoverground.onmousemove = function (e) {
     for (let i = 0; i < foregroundMap.length; i++) {
         if(typeof foregroundMap[i] !== 'undefined'){
             if(foregroundMap[i]['x'] == roundedX && foregroundMap[i]['y'] == roundedY){
-                hoveredEntityDisplay.innerHTML = JSON.stringify(foregroundMap[i])
+                hoveredEntityDisplay.innerHTML = foregroundMap[i]['name']
                 break
             }
             else{
@@ -97,3 +136,15 @@ hoverground.onmousemove = function (e) {
         }
     }
 }
+
+setInterval(() => {
+    let selectedDisplayText = selectedDisplay.innerText
+    if(selectedDisplayText != ''){
+        let object = JSON.parse(selectedDisplayText)
+        for (let i = 0; i < foregroundMap.length; i++) {
+            if(foregroundMap[i]['x'] == object['x'] && foregroundMap[i]['y'] == object['y']){
+                selectedDisplay.innerHTML = JSON.stringify(foregroundMap[i])
+            }
+        }
+    }
+}, 1000/60);
