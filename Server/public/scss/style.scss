@@ -10,6 +10,15 @@ button{
     float: left;
 }
 
+#hoveredEntityDisplay{  
+    position: absolute;
+    left: 25px;
+    top: 45%;
+    float:left;
+    text-align: left;
+    width: 100px;
+}
+
 canvas{
     left: 30%;
     border: 5px solid black;

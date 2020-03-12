@@ -10,6 +10,12 @@ body{
     box-sizing: border-box;
 }
 
+#hoveredEntityDisplay{  
+    float:left;
+    text-align: left;
+    width: 100px;
+}
+
 span{
     font-size: 0;
 }

@@ -42,6 +42,8 @@ let foregroundMap = []
 let backgroundMap = []
 let hovergroundMap = []
 
+let hoveredEntityDisplay = document.getElementById('hoveredEntityDisplay')
+
 init()
 
 function init () {
@@ -68,8 +70,19 @@ hoverground.onmousemove = function (e) {
     x = e.clientX - rect.left,
     y = e.clientY - rect.top,
     i = 0, r;
+    let roundedX = Math.floor(x / 10)
+    let roundedY = Math.floor(y / 10)
     for (let i = 0; i < backgroundMap.length; i++) {
-        if(backgroundMap[i]['x'] == Math.floor(x / 10) && backgroundMap[i]['y'] == Math.floor(y / 10)){
+        if(typeof foregroundMap[i] !== 'undefined'){
+            if(foregroundMap[i]['x'] == roundedX && foregroundMap[i]['y'] == roundedY){
+                console.log(foregroundMap[i])
+                hoveredEntityDisplay.innerHTML = JSON.stringify(foregroundMap[i])
+            }
+            else{
+                hoveredEntityDisplay.innerHTML = ''
+            }
+        }
+        if(backgroundMap[i]['x'] == roundedX && backgroundMap[i]['y'] == roundedY){
             hovergroundMap = []
             hovergroundMap.push({x: backgroundMap[i]['x'], y: backgroundMap[i]['y'], color: 'yellow'})
             hctx.clearRect(0,0, hoverground.width, hoverground.height)
