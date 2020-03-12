@@ -19,7 +19,14 @@ button {
   top: 45%;
   float: left;
   text-align: left;
-  width: 100px;
+}
+
+#hoverDisplay {
+  position: absolute;
+  left: 25px;
+  top: 35%;
+  float: left;
+  text-align: left;
 }
 
 canvas {

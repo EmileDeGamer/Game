@@ -1,5 +1,9 @@
-let Bot = require("./botBase")
+let Bot = require("./BotBase")
 
 module.exports = class CustomBot extends Bot{
-    moveTowardsEntity(pizza)
+    //moveTowardsEntity(pizza)
+    constructor(){
+        
+    }
+    
 }

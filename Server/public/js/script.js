@@ -44,6 +44,7 @@ let backgroundMap = []
 let hovergroundMap = []
 
 let hoveredEntityDisplay = document.getElementById('hoveredEntityDisplay')
+let hoverDisplay = document.getElementById('hoverDisplay')
 
 init()
 
@@ -71,6 +72,7 @@ hoverground.onmousemove = function (e) {
     i = 0, r;
     let roundedX = Math.floor(x / 10)
     let roundedY = Math.floor(y / 10)
+    hoverDisplay.innerHTML = "X: " + roundedX + " Y: " + roundedY
     for (let i = 0; i < backgroundMap.length; i++) {
         if(backgroundMap[i]['x'] == roundedX && backgroundMap[i]['y'] == roundedY){
             hovergroundMap = []

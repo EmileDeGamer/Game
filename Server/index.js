@@ -43,9 +43,15 @@ http.listen(process.env.PORT, function(){
 
 //#endregion
 
-let Bot = require("./classes/botBase")
+let Bot = require("./classes/BotBase")
+let CustomBot = require("./classes/CustomBot-Henk")
 
-let background = [], foreground = [], bots = []
+let EnergyGenerator = require("./classes/EnergyGeneratorBase")
+
+let energyGenerator = new EnergyGenerator(99,99,'purple',1, 10, 0)
+
+let background = [], foreground = [], bots = [], generators = []
+generators.push(energyGenerator)
 let coordX = 0, coordY = 0
 let spawnX = 49, spawnY = 49
 for (let i = 0; i < 100; i++) {
@@ -83,14 +89,14 @@ io.on('connection', function(socket){
         checkOnDuplicateName(data, 0, socket)
         io.emit('updateMap', {map:background,name:'background'})
     })
-    
-    setInterval(() => {
+
+    /*setInterval(() => {
         for (let i = 0; i < background.length; i++) {
             background[i]['color'] = colors[randomIndexOfColor]
         }
         randomIndexOfColor = Math.floor(Math.random() * colors.length)
         socket.emit('updateMap', {map:background, name:'background'})
-    }, 1000)
+    }, 1000)*/
 
     //movement for testing later automatic by code from clients
     //#region optional
@@ -124,11 +130,15 @@ io.on('connection', function(socket){
 
     setInterval(() => {
         foreground = []
+        for (let i = 0; i < generators.length; i++) {
+            console.log(generators[i].getEnergy())
+            foreground.push({x:generators[i]['x'], y:generators[i]['y'], color:generators[i]['color'], generationInterval:generators[i]['generationInterval'], maxEnergy:generators[i]['maxEnergy'], currentEnergy:generators[i]['currentEnergy']})
+        }
         for (let x = 0; x < bots.length; x++) {
             foreground.push({x:bots[x]['x'], y:bots[x]['y'], color:'black', name:bots[x]['name'], owner:bots[x]['owner']})
         }
         io.emit('updateMap', {map:foreground, name:'foreground'})
-    }, 1000/60)
+    }, 1000)
 })
 
 function checkOnDuplicateName(data, attempt, socket){
