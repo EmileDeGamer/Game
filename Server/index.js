@@ -48,7 +48,7 @@ let CustomBot = require("./classes/CustomBot-Henk")
 
 let EnergyGenerator = require("./classes/EnergyGeneratorBase")
 
-let energyGenerator = new EnergyGenerator(99,99,'purple',1, 10, 0)
+let energyGenerator = new EnergyGenerator(99,99,'Energy Generator','purple',1, 10, 0)
 
 let background = [], foreground = [], bots = [], generators = []
 generators.push(energyGenerator)
@@ -131,7 +131,7 @@ io.on('connection', function(socket){
     setInterval(() => {
         foreground = []
         for (let i = 0; i < generators.length; i++) {
-            foreground.push({x:generators[i]['x'], y:generators[i]['y'], color:generators[i]['color'], generationInterval:generators[i]['generationInterval'], maxEnergy:generators[i]['maxEnergy'], currentEnergy:generators[i]['currentEnergy']})
+            foreground.push({x:generators[i]['x'], y:generators[i]['y'], name:generators[i]['name'], color:generators[i]['color'], generationInterval:generators[i]['generationInterval'], maxEnergy:generators[i]['maxEnergy'], currentEnergy:generators[i]['currentEnergy']})
         }
         for (let x = 0; x < bots.length; x++) {
             foreground.push({x:bots[x]['x'], y:bots[x]['y'], color:'black', name:bots[x]['name'], owner:bots[x]['owner']})
