@@ -9,7 +9,6 @@ socket.on('connect', function(){
 socket.on('updateMap', function(data){
     if(data['name'] == 'foreground'){
         foregroundMap = data['map']
-        //console.log(foregroundMap)
         fctx.clearRect(0,0, foreground.width, foreground.height)
         for (let i = 0; i < data['map'].length; i++) {
             fctx.fillStyle = data['map'][i]['color']
@@ -32,9 +31,11 @@ socket.on('changedNameTo', function(data){
 
 socket.emit('createMe', botname)
 
+//#region variables
 let background = document.getElementById('layer1')
 let foreground = document.getElementById('layer2')
 let hoverground = document.getElementById('layer3')
+
 let bctx = background.getContext('2d')
 let fctx = foreground.getContext('2d')
 let hctx = hoverground.getContext('2d')
@@ -52,12 +53,11 @@ let maxX = 99
 let maxY = 99
 let mapSizeX = maxX + 1
 let mapSizeY = maxY + 1
+//#endregion
 
 init()
 
 function init () {
-    
-    
     background.width = mapSizeX*pieceSize
     background.height = mapSizeY*pieceSize
     foreground.width = mapSizeX*pieceSize
@@ -85,6 +85,8 @@ hoverground.onmousedown = function (e) {
     if(roundedY > maxY){
         roundedY = maxY
     }
+
+    //displaying data of selected entity
     for (let i = 0; i < foregroundMap.length; i++) {
         if(typeof foregroundMap[i] !== 'undefined'){
             if(foregroundMap[i]['x'] == roundedX && foregroundMap[i]['y'] == roundedY){
@@ -112,6 +114,8 @@ hoverground.onmousemove = function (e) {
         roundedY = maxY
     }
     hoverDisplay.innerHTML = "X: " + roundedX + " Y: " + roundedY
+
+    //the entity select cursor
     for (let i = 0; i < backgroundMap.length; i++) {
         if(backgroundMap[i]['x'] == roundedX && backgroundMap[i]['y'] == roundedY){
             hovergroundMap = []
@@ -124,6 +128,7 @@ hoverground.onmousemove = function (e) {
         }
     }  
 
+    //displaying the entity currently hovering over
     for (let i = 0; i < foregroundMap.length; i++) {
         if(typeof foregroundMap[i] !== 'undefined'){
             if(foregroundMap[i]['x'] == roundedX && foregroundMap[i]['y'] == roundedY){
@@ -137,6 +142,7 @@ hoverground.onmousemove = function (e) {
     }
 }
 
+//updating realtime data of selected entity
 setInterval(() => {
     let selectedDisplayText = selectedDisplay.innerText
     if(selectedDisplayText != ''){
