@@ -56,6 +56,7 @@ for (let i = 0; i < 100; i++) {
     coordY++
     coordX=0
 }
+
 /*for (let i = 0; i < 100; i++) {
     background[i]['color'] = 'red'
     background[i+9900]['color'] = 'red'
@@ -125,13 +126,12 @@ io.on('connection', function(socket){
             foreground.push({x:bots[x]['x'], y:bots[x]['y'], color:'black', name:bots[x]['name'], owner:bots[x]['owner']})
         }
         io.emit('updateMap', {map:foreground, name:'foreground'})
-    }, 1000/30)
+    }, 1000/60)
 })
 
 function checkOnDuplicateName(data, attempt, socket){
     if(bots.map(function(e) { return e.name; }).indexOf(data) == -1){
-        let bot = new Bot(data, spawnX, spawnY, data, socket)
-        bots.push(bot)
+        bots.push(new Bot(data, spawnX, spawnY, data, socket))
         socket.emit('changedNameTo', data)
     }
     else{
