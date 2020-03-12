@@ -72,8 +72,9 @@ io.on('connection', function(socket){
 
     socket.on('disconnect', function(){
         console.log('disconnected! :(')
-        if(bots.map(function(e) { return e.socket; }).indexOf(socket) != -1){
-            bots.splice(bots.map(function(e) { return e.socket; }).indexOf(socket))
+        if(bots.map(function(e) { return e.socket; }).indexOf(socket) !== -1){
+            //console.log(bots.map(function(e) { return e.socket; }).indexOf(socket))
+            bots.splice(bots.map(function(e) { return e.socket; }).indexOf(socket), 1)
         }
     })
 
