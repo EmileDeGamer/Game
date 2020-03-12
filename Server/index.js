@@ -64,8 +64,8 @@ for (let i = 0; i < 100; i++) {
     background[i*100+99]['color'] = 'red'
 }*/
 
-//let colors = ['red', 'orange', 'yellow', 'green', 'lightblue', 'blue', 'purple', 'pink']
-//let randomIndexOfColor = Math.floor(Math.random() * colors.length)
+let colors = ['red', 'orange', 'yellow', 'green', 'lightblue', 'blue', 'purple', 'pink']
+let randomIndexOfColor = Math.floor(Math.random() * colors.length)
 
 io.on('connection', function(socket){
     console.log('connection made!')  
@@ -81,14 +81,18 @@ io.on('connection', function(socket){
         checkOnDuplicateName(data, 0, socket)
         io.emit('updateMap', {map:background,name:'background'})
     })
- 
-    /*setInterval(() => {
+    for (let i = 0; i < background.length; i++) {
+        background[i]['color'] = colors[randomIndexOfColor]
+        randomIndexOfColor = Math.floor(Math.random() * colors.length)
+    }
+    
+    setInterval(() => {
         for (let i = 0; i < background.length; i++) {
             background[i]['color'] = colors[randomIndexOfColor]
         }
         randomIndexOfColor = Math.floor(Math.random() * colors.length)
         socket.emit('updateMap', {map:background, name:'background'})
-    }, 1000)*/
+    }, 1000)
 
     //movement for testing later automatic by code from clients
     //#region optional
@@ -126,6 +130,7 @@ io.on('connection', function(socket){
             foreground.push({x:bots[x]['x'], y:bots[x]['y'], color:'black', name:bots[x]['name'], owner:bots[x]['owner']})
         }
         io.emit('updateMap', {map:foreground, name:'foreground'})
+        //console.log(foreground)
     }, 1000/60)
 })
 

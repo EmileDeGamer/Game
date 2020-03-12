@@ -9,6 +9,7 @@ socket.on('connect', function(){
 socket.on('updateMap', function(data){
     if(data['name'] == 'foreground'){
         foregroundMap = data['map']
+        //console.log(foregroundMap)
         fctx.clearRect(0,0, foreground.width, foreground.height)
         for (let i = 0; i < data['map'].length; i++) {
             fctx.fillStyle = data['map'][i]['color']
@@ -63,8 +64,6 @@ for (let i = 0; i < buttons.length; i++) {
     buttons[i].onclick = function(){socket.emit('move', {direction:buttons[i].innerHTML,name:botname})}
 }
 
-//console.log(getMousePos(foreground, event))
-
 hoverground.onmousemove = function (e) {
     var rect = this.getBoundingClientRect(),
     x = e.clientX - rect.left,
@@ -73,15 +72,6 @@ hoverground.onmousemove = function (e) {
     let roundedX = Math.floor(x / 10)
     let roundedY = Math.floor(y / 10)
     for (let i = 0; i < backgroundMap.length; i++) {
-        if(typeof foregroundMap[i] !== 'undefined'){
-            if(foregroundMap[i]['x'] == roundedX && foregroundMap[i]['y'] == roundedY){
-                console.log(foregroundMap[i])
-                hoveredEntityDisplay.innerHTML = JSON.stringify(foregroundMap[i])
-            }
-            else{
-                hoveredEntityDisplay.innerHTML = ''
-            }
-        }
         if(backgroundMap[i]['x'] == roundedX && backgroundMap[i]['y'] == roundedY){
             hovergroundMap = []
             hovergroundMap.push({x: backgroundMap[i]['x'], y: backgroundMap[i]['y'], color: 'yellow'})
@@ -92,11 +82,16 @@ hoverground.onmousemove = function (e) {
             }
         }
     }  
-}
 
-/*function showCoords(event) {
-    var x = event.;
-    var y = event.clientY;
-    var coords = "X coords: " + x + ", Y coords: " + y;
-    console.log(coords)
-  }*/
+    for (let i = 0; i < foregroundMap.length; i++) {
+        if(typeof foregroundMap[i] !== 'undefined'){
+            if(foregroundMap[i]['x'] == roundedX && foregroundMap[i]['y'] == roundedY){
+                hoveredEntityDisplay.innerHTML = JSON.stringify(foregroundMap[i])
+                break
+            }
+            else{
+                hoveredEntityDisplay.innerHTML = ''
+            }
+        }
+    }
+}
