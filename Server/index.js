@@ -70,22 +70,19 @@ let randomIndexOfColor = Math.floor(Math.random() * colors.length)
 io.on('connection', function(socket){
     console.log('connection made!')  
 
+    //#region disconnecting for testing, later bots when they die they will be removed from array
     socket.on('disconnect', function(){
         console.log('disconnected! :(')
         if(bots.map(function(e) { return e.socket; }).indexOf(socket) !== -1){
-            //console.log(bots.map(function(e) { return e.socket; }).indexOf(socket))
             bots.splice(bots.map(function(e) { return e.socket; }).indexOf(socket), 1)
         }
     })
+    //#endregion
 
     socket.on('createMe', function(data){
         checkOnDuplicateName(data, 0, socket)
         io.emit('updateMap', {map:background,name:'background'})
     })
-    for (let i = 0; i < background.length; i++) {
-        background[i]['color'] = colors[randomIndexOfColor]
-        randomIndexOfColor = Math.floor(Math.random() * colors.length)
-    }
     
     setInterval(() => {
         for (let i = 0; i < background.length; i++) {
@@ -131,7 +128,6 @@ io.on('connection', function(socket){
             foreground.push({x:bots[x]['x'], y:bots[x]['y'], color:'black', name:bots[x]['name'], owner:bots[x]['owner']})
         }
         io.emit('updateMap', {map:foreground, name:'foreground'})
-        //console.log(foreground)
     }, 1000/60)
 })
 

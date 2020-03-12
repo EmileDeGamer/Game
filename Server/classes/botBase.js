@@ -5,5 +5,9 @@ module.exports = class Bot {
         this.y = y //the current y
         this.owner = owner //maybe a user with different name than bot when using accounts
         this.socket = socket //for disconnecting to know which bot to delete
-    }
+
+        function moveTowardsEntity(entity){
+            console.log(entity)
+        }
+    }    
 }
