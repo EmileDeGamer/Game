@@ -60,7 +60,7 @@ for (let i = 0; i < 100; i++) {
     coordX=0
 }
 
-for (let i = 0; i < 25; i++) {
+for (let i = 0; i < 50; i++) {
     let energyGenerator = new EnergyGenerator(Math.floor(Math.random() * 99), Math.floor(Math.random() * 99), 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100), 0)
     generators.push(energyGenerator)
 }

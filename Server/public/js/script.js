@@ -1,3 +1,4 @@
+//must be removed after user can code bots
 let botname = prompt('Tell me your bot name', 'bot name')
 
 let socket = io()
@@ -25,11 +26,13 @@ socket.on('updateMap', function(data){
     }
 })
 
+//#region must be removed after user can code bots
 socket.on('changedNameTo', function(data){
     botname = data
 })
 
 socket.emit('createMe', botname)
+//#endregion
 
 //#region variables
 let background = document.getElementById('background')
@@ -66,11 +69,13 @@ function init () {
     hoverground.height = mapSizeY*pieceSize
 }
 
+//#region must be removed after user can code bots
 let buttons = [document.getElementById('w'), document.getElementById('a'), document.getElementById('s'), document.getElementById('d')]
 
 for (let i = 0; i < buttons.length; i++) {
     buttons[i].onclick = function(){socket.emit('move', {direction:buttons[i].innerHTML,name:botname})}
 }
+//#endregion
 
 hoverground.onmousedown = function (e) {
     var rect = this.getBoundingClientRect(),
