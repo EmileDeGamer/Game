@@ -151,3 +151,65 @@ function checkOnDuplicateName(data, attempt, socket){
         checkOnDuplicateName(data + attempt++, attempt++, socket)
     }
 }
+
+
+setTimeout(() => {
+    findPath()
+}, 1000)
+
+bots.push(new Bot('test', spawnX, spawnY, 'test', 'pizza'))
+function findPath(){
+    let thingsToDo = []
+    for (let i = 0; i < foreground.length; i++) {
+        if(foreground[i]['x'] == generators[0]['x'] && foreground[i]['y'] == generators[0]['y']){
+            console.log("X:" + foreground[i]['x'] + " Y:" + foreground[i]['y'])
+            let distanceX = foreground[i]['x'] - bots[0]['x']
+            let distanceY = foreground[i]['y'] - bots[0]['y']
+            if(distanceX > 0){
+                //right
+                for (let i = 0; i < distanceX; i++) {
+                    thingsToDo.push('right')
+                }
+            }
+            else if (distanceX < 0){
+                //left
+                distanceX = distanceX.toString().replace('-', '')
+                for (let i = 0; i < distanceX; i++) {
+                    thingsToDo.push('left')
+                }
+            }
+            if(distanceY > 0){
+                //down
+                for (let i = 0; i < distanceY; i++) {
+                    thingsToDo.push('down')
+                }
+            }
+            else if (distanceY < 0){
+                //up
+                distanceY = distanceY.toString().replace('-', '')
+                for (let i = 0; i < distanceY; i++) {
+                    thingsToDo.push('up')
+                }
+            }
+            break
+        }
+    }
+    thingsToDo.splice(thingsToDo.length-1, 1)
+
+    for (let i=0; i<thingsToDo.length; i++) { 
+        setTimeout(function() { 
+            if(thingsToDo[i] == 'left'){
+                bots[0]['x']--
+            }
+            else if (thingsToDo[i] == 'right'){
+                bots[0]['x']++
+            }
+            else if (thingsToDo[i] == 'up'){
+                bots[0]['y']--
+            }
+            else if (thingsToDo[i] == 'down'){
+                bots[0]['y']++
+            }
+        }, 100 * i)
+    }
+}
