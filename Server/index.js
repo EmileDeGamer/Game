@@ -59,8 +59,9 @@ for (let i = 0; i < 100; i++) {
     coordY++
     coordX=0
 }
+console.log(background.length)
 
-for (let i = 0; i < 50; i++) {
+for (let i = 0; i < 250; i++) {
     let energyGenerator = new EnergyGenerator(Math.floor(Math.random() * 99), Math.floor(Math.random() * 99), 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100), 0)
     generators.push(energyGenerator)
 }
@@ -92,13 +93,13 @@ io.on('connection', function(socket){
         io.emit('updateMap', {map:background,name:'background'})
     })
 
-    /*setInterval(() => {
-        for (let i = 0; i < background.length; i++) {
+    setInterval(() => {
+        /*for (let i = 0; i < background.length; i++) {
             background[i]['color'] = colors[randomIndexOfColor]
         }
-        randomIndexOfColor = Math.floor(Math.random() * colors.length)
+        randomIndexOfColor = Math.floor(Math.random() * colors.length)*/
         socket.emit('updateMap', {map:background, name:'background'})
-    }, 1000)*/
+    }, 1000)
 
     //movement for testing later automatic by code from clients
     //#region optional
@@ -145,127 +146,107 @@ io.on('connection', function(socket){
 function checkOnDuplicateName(data, attempt, socket){
     if(bots.map(function(e) { return e.name; }).indexOf(data) == -1){
         bots.push(new Bot(data, spawnX, spawnY, data, socket))
-        socket.emit('changedNameTo', data)
+        //socket.emit('changedNameTo', data)
     }
     else{
         checkOnDuplicateName(data + attempt++, attempt++, socket)
     }
 }
 
+for (let i = 0; i < 50; i++) {
+    checkOnDuplicateName('test', 0, 'test')
+}
 
 setTimeout(() => {
-    findPath(bots[0], generators[0])
+    for (let i = 0; i < bots.length; i++) {
+        retrieveNeighboursAndCalculateDistance(bots[i], generators[0])
+    }
+    console.log(generators[0])
 }, 1000)
 
-bots.push(new Bot('test', spawnX, spawnY, 'test', 'pizza'))
-/*function findPath(){
-    let thingsToDo = []
-    for (let i = 0; i < foreground.length; i++) {
-        if(foreground[i]['x'] == generators[0]['x'] && foreground[i]['y'] == generators[0]['y']){
-            console.log("X:" + foreground[i]['x'] + " Y:" + foreground[i]['y'])
-            let distanceX = foreground[i]['x'] - bots[0]['x']
-            let distanceY = foreground[i]['y'] - bots[0]['y']
-            if(distanceX > 0){
-                //right
-                for (let i = 0; i < distanceX; i++) {
-                    thingsToDo.push('right')
-                }
-            }
-            else if (distanceX < 0){
-                //left
-                distanceX = distanceX.toString().replace('-', '')
-                for (let i = 0; i < distanceX; i++) {
-                    thingsToDo.push('left')
-                }
-            }
-            if(distanceY > 0){
-                //down
-                for (let i = 0; i < distanceY; i++) {
-                    thingsToDo.push('down')
-                }
-            }
-            else if (distanceY < 0){
-                //up
-                distanceY = distanceY.toString().replace('-', '')
-                for (let i = 0; i < distanceY; i++) {
-                    thingsToDo.push('up')
-                }
-            }
-            break
+
+
+function retrieveNeighboursAndCalculateDistance(a, b){
+    for (let i = 0; i < background.length; i++) {
+        if(background[i]['x'] == a['x'] + 1 && background[i]['y'] == a['y']){
+            calculateFCost(i,b)
+        }
+        else if(background[i]['x'] == a['x'] - 1 && background[i]['y'] == a['y']){
+            calculateFCost(i,b)
+        }
+        else if(background[i]['x'] == a['x'] && background[i]['y'] == a['y'] + 1){
+            calculateFCost(i,b)
+        }
+        else if(background[i]['x'] == a['x'] && background[i]['y'] == a['y'] - 1){
+            calculateFCost(i,b)
         }
     }
-    thingsToDo.splice(thingsToDo.length-1, 1)
 
-    for (let i=0; i<thingsToDo.length; i++) { 
-        setTimeout(function() { 
-            if(thingsToDo[i] == 'left'){
-                bots[0]['x']--
-            }
-            else if (thingsToDo[i] == 'right'){
-                bots[0]['x']++
-            }
-            else if (thingsToDo[i] == 'up'){
-                bots[0]['y']--
-            }
-            else if (thingsToDo[i] == 'down'){
-                bots[0]['y']++
-            }
-        }, 100 * i)
-    }
-}*/
-
-function findPath(bot, entity){
-    let thingsToDo = []
-    for (let i = 0; i < foreground.length; i++) {
-        if(foreground[i]['x'] == entity['x'] && foreground[i]['y'] == entity['y']){
-            console.log("X:" + foreground[i]['x'] + " Y:" + foreground[i]['y'])
-            let distanceX = foreground[i]['x'] - bot['x']
-            let distanceY = foreground[i]['y'] - bot['y']
-            if(distanceX > 0){
-                //right
-                for (let i = 0; i < distanceX; i++) {
-                    thingsToDo.push('right')
+    let costs = []
+    for (let i = 0; i < background.length; i++) {
+        if(background[i]['color'] != 'red' && background[i]['color'] != 'blue'){
+            if(typeof background[i]['fCost'] != 'undefined'){
+                if(costs.indexOf(background[i]['fCost']) == -1){
+                    costs.push(background[i]['fCost'])
                 }
             }
-            else if (distanceX < 0){
-                //left
-                distanceX = distanceX.toString().replace('-', '')
-                for (let i = 0; i < distanceX; i++) {
-                    thingsToDo.push('left')
-                }
-            }
-            if(distanceY > 0){
-                //down
-                for (let i = 0; i < distanceY; i++) {
-                    thingsToDo.push('down')
-                }
-            }
-            else if (distanceY < 0){
-                //up
-                distanceY = distanceY.toString().replace('-', '')
-                for (let i = 0; i < distanceY; i++) {
-                    thingsToDo.push('up')
-                }
-            }
-            break
         }
     }
-    thingsToDo.splice(thingsToDo.length-1, 1)
 
-    for (let i=0; i<thingsToDo.length; i++) { 
-        setTimeout(function() { 
-            if(thingsToDo[i] == 'left'){
-                bot['x']--
+    let lowestValue = Math.min.apply(Math, costs) 
+
+    for (let i = 0; i < background.length; i++) {
+        if(typeof background[i]['fCost'] != 'undefined'){
+            if(background[i]['fCost'] == lowestValue){
+                //first check if nothing is on the way
+                //todo
+
+                background[i]['color'] = 'blue'
+                if(background[i]['x'] == b['x'] && background[i]['y'] == b['y']){
+                    break
+                }
+                /*else if(background[i]['x'] + 1 == b['x'] && background[i]['y'] == b['y']){
+                    break
+                }
+                else if(background[i]['x'] - 1 == b['x'] && background[i]['y'] == b['y']){
+                    break
+                }
+                else if(background[i]['x'] == b['x'] && background[i]['y'] + 1 == b['y']){
+                    break
+                }
+                else if(background[i]['x'] == b['x'] && background[i]['y'] - 1 == b['y']){
+                    break
+                }*/
+                else{
+                    retrieveNeighboursAndCalculateDistance(background[i], b)
+                    break
+                }
             }
-            else if (thingsToDo[i] == 'right'){
-                bot['x']++
-            }
-            else if (thingsToDo[i] == 'up'){
-                bot['y']--
-            }
-            else if (thingsToDo[i] == 'down'){
-                bot['y']++
-            }
-        }, 100 * i)
+            
+        }
     }
+    for (let i = 0; i < background.length; i++) {
+        if(background[i]['color'] == 'green'){
+            if(typeof background[i]['fCost'] != 'undefined'){
+                if (background[i]['fCost'] != lowestValue){
+                    background[i]['color'] = 'red'
+                }
+            }
+        }
+    }
+}
+
+function calculateFCost(i,b){
+    background[i]['hCost'] = calculateManhattanDistance(background[i],b)
+    background[i]['fCost'] = background[i]['hCost']
+    if(background[i]['color'] != 'red' && background[i]['color'] != 'blue'){
+        background[i]['color'] = 'green'
+    }
+}
+
+function calculateManhattanDistance(a,b){
+    let manhattanX = Math.abs(a['x'] - b['x'])
+    let manhattanY = Math.abs(a['y'] - b['y'])
+    let manhattan = Math.abs(manhattanX + manhattanY)
+    return manhattan
 }
