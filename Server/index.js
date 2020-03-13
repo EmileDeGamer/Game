@@ -48,19 +48,21 @@ let CustomBot = require("./classes/CustomBot-Henk")
 
 let EnergyGenerator = require("./classes/EnergyGeneratorBase")
 
-let energyGenerator = new EnergyGenerator(99,99,'Energy Generator','purple',1, 10, 0)
-
 let background = [], foreground = [], bots = [], generators = []
-generators.push(energyGenerator)
 let coordX = 0, coordY = 0
 let spawnX = 49, spawnY = 49
 for (let i = 0; i < 100; i++) {
     for (let x = 0; x < 100; x++) {
-        background.push({x:coordX,y:coordY,color:"red"})
+        background.push({x:coordX,y:coordY,color:"lightblue"})
         coordX++
     }
     coordY++
     coordX=0
+}
+
+for (let i = 0; i < 25; i++) {
+    let energyGenerator = new EnergyGenerator(Math.floor(Math.random() * 99), Math.floor(Math.random() * 99), 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100), 0)
+    generators.push(energyGenerator)
 }
 
 /*for (let i = 0; i < 100; i++) {
@@ -131,10 +133,10 @@ io.on('connection', function(socket){
     setInterval(() => {
         foreground = []
         for (let i = 0; i < generators.length; i++) {
-            foreground.push({x:generators[i]['x'], y:generators[i]['y'], name:generators[i]['name'], color:generators[i]['color'], generationInterval:generators[i]['generationInterval'], maxEnergy:generators[i]['maxEnergy'], currentEnergy:generators[i]['currentEnergy']})
+            foreground.push({x:generators[i]['x'], y:generators[i]['y'], name:generators[i]['name'], color:generators[i]['color'], generationInterval:generators[i]['generationInterval'], maxEnergy:generators[i]['maxEnergy'], currentEnergy:generators[i]['currentEnergy'], type:generators[i]['type']})
         }
         for (let x = 0; x < bots.length; x++) {
-            foreground.push({x:bots[x]['x'], y:bots[x]['y'], color:'black', name:bots[x]['name'], owner:bots[x]['owner']})
+            foreground.push({x:bots[x]['x'], y:bots[x]['y'], color:'black', name:bots[x]['name'], owner:bots[x]['owner'], type:bots[x]['type']})
         }
         io.emit('updateMap', {map:foreground, name:'foreground'})
     }, 1000/60)

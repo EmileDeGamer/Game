@@ -147,10 +147,19 @@ setInterval(() => {
     let selectedDisplayText = selectedDisplay.innerText
     if(selectedDisplayText != ''){
         let object = JSON.parse(selectedDisplayText)
-        for (let i = 0; i < foregroundMap.length; i++) {
-            if(foregroundMap[i]['x'] == object['x'] && foregroundMap[i]['y'] == object['y']){
-                selectedDisplay.innerHTML = JSON.stringify(foregroundMap[i])
+        if(object['type'] == 'bot'){
+            for (let i = 0; i < foregroundMap.length; i++) {
+                if(foregroundMap[i]['name'] == object['name']){
+                    selectedDisplay.innerHTML = JSON.stringify(foregroundMap[i])
+                }
+            }
+        }
+        else{
+            for (let i = 0; i < foregroundMap.length; i++) {
+                if(foregroundMap[i]['x'] == object['x'] && foregroundMap[i]['y'] == object['y']){
+                    selectedDisplay.innerHTML = JSON.stringify(foregroundMap[i])
+                }
             }
         }
     }
-}, 1000/60);
+}, 1000/60)

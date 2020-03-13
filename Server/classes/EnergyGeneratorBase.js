@@ -6,6 +6,7 @@ module.exports = class EnergyGeneratorBase{
         this.y = y
         this.color = color
         this.name = name
+        this.type = 'generator'
         let generator = this
 
         for (let i=this.currentEnergy; i<=this.maxEnergy; i++) { 
