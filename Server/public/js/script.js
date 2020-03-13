@@ -32,9 +32,9 @@ socket.on('changedNameTo', function(data){
 socket.emit('createMe', botname)
 
 //#region variables
-let background = document.getElementById('layer1')
-let foreground = document.getElementById('layer2')
-let hoverground = document.getElementById('layer3')
+let background = document.getElementById('background')
+let foreground = document.getElementById('foreground')
+let hoverground = document.getElementById('hoverground')
 
 let bctx = background.getContext('2d')
 let fctx = foreground.getContext('2d')
@@ -151,6 +151,7 @@ setInterval(() => {
             for (let i = 0; i < foregroundMap.length; i++) {
                 if(foregroundMap[i]['name'] == object['name']){
                     selectedDisplay.innerHTML = JSON.stringify(foregroundMap[i])
+                    break
                 }
             }
         }
@@ -158,6 +159,7 @@ setInterval(() => {
             for (let i = 0; i < foregroundMap.length; i++) {
                 if(foregroundMap[i]['x'] == object['x'] && foregroundMap[i]['y'] == object['y']){
                     selectedDisplay.innerHTML = JSON.stringify(foregroundMap[i])
+                    break
                 }
             }
         }

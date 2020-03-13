@@ -40,5 +40,6 @@ button {
 canvas {
   left: 30%;
   border: 5px solid black;
+  cursor: none;
 }
 /*# sourceMappingURL=style.css.map */
