@@ -164,8 +164,6 @@ setTimeout(() => {
     console.log(generators[0])
 }, 1000)
 
-
-
 function retrieveNeighboursAndCalculateDistance(a, b){
     for (let i = 0; i < background.length; i++) {
         if(background[i]['x'] == a['x'] + 1 && background[i]['y'] == a['y']){
@@ -200,6 +198,15 @@ function retrieveNeighboursAndCalculateDistance(a, b){
             if(background[i]['fCost'] == lowestValue){
                 //first check if nothing is on the way
                 //todo
+                for (let x = 0; x < foreground.length; x++) {
+                    if(foreground[x]['x'] == background[i]['x'] && foreground[x]['y'] == background[i]['y']){
+                        if(foreground[x]['type'] == 'generator'){
+                            costs.splice(costs.indexOf(lowestValue, 1))
+                            lowestValue = Math.min.apply(Math, costs)
+                            
+                        }
+                    }
+                }
 
                 background[i]['color'] = 'blue'
                 if(background[i]['x'] == b['x'] && background[i]['y'] == b['y']){
