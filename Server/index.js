@@ -206,7 +206,7 @@ function findShortestPath(startEntity, target){
         for (let i = 0; i < directions.length; i++) {
             let newLocation = retrieveNeighboursFromDirection(currentLocation, directions[i], grid)
             if(newLocation['status'] == 'goal'){
-                return newLocation.path
+                return newLocation['path']
             }
             else if(newLocation.status == 'valid'){
                 queue.push(newLocation)
@@ -218,7 +218,7 @@ function findShortestPath(startEntity, target){
 }
 
 function retrieveNeighboursFromDirection(currentLocation, direction, grid){
-    let newPath = currentLocation.path.slice()
+    let newPath = currentLocation['path'].slice()
     newPath.push(direction)
     let x = currentLocation['x']
     let y = currentLocation['y']
