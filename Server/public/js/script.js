@@ -127,12 +127,22 @@ hoverground.onmousemove = function (e) {
 setInterval(() => {
     let selectedDisplayText = selectedDisplay.innerText
     if(selectedDisplayText != ''){
-        let object = JSON.stringify(JSON.parse(selectedDisplayText))
+        let object = JSON.parse(selectedDisplayText)
         if(object == "{}"){
-            selectedDisplay.innerHTML = ''
+            selectedDisplayText = ''
+        }
+        else if(object['type'] == 'bot'){
+            for (let i = 0; i < foregroundMap.length; i++) {
+                for (let x = 0; x < foregroundMap[i].length; x++) {
+                    if(foregroundMap[i][x]['name'] == object['name']){
+                        selectedDisplay.innerHTML = JSON.stringify(foregroundMap[i][x])
+                        break
+                    }
+                }
+            }
         }
         else{
-            selectedDisplay.innerHTML = foregroundMap[object['x']][object['y']]
+            selectedDisplay.innerHTML = JSON.stringify(foregroundMap[object['x']][object['y']])
         }
     }
-}, 1000/60)
+}, 1000/10)

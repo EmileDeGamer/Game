@@ -88,7 +88,7 @@ io.on('connection', function(socket){
     //#region update maps
     setInterval(() => {
         socket.emit('updateMap', {map:background, name:'background'})
-    }, 1000/60)
+    }, 1000/10)
 
     setInterval(() => {
         foreground = []
@@ -106,7 +106,7 @@ io.on('connection', function(socket){
             foreground[bots[x]['x']][bots[x]['y']] = bots[x]
         }
         io.emit('updateMap', {map:foreground, name:'foreground'})
-    }, 1000/60)
+    }, 1000/10)
     //#endregion
 })
 
