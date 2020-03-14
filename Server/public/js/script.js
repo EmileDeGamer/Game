@@ -46,17 +46,23 @@ socket.on('updateMap', function(data){
     if(data['name'] == 'foreground'){
         foregroundMap = data['map']
         fctx.clearRect(0,0, foreground.width, foreground.height)
-        for (let i = 0; i < data['map'].length; i++) {
-            fctx.fillStyle = data['map'][i]['color']
-            fctx.fillRect(data['map'][i]['x']*10,data['map'][i]['y']*10,10,10)
+        for (let i = 0; i < foregroundMap.length; i++) {
+            for (let x = 0; x < foregroundMap[i].length; x++) {
+                if(typeof foregroundMap[i][x]['color'] != 'undefined'){
+                    fctx.fillStyle = foregroundMap[i][x]['color']
+                    fctx.fillRect(i*10,x*10,10,10)
+                }
+            }
         }
     }
     else if (data['name'] == 'background'){
         backgroundMap = data['map']
         bctx.clearRect(0,0, background.width, background.height)
-        for (let i = 0; i < data['map'].length; i++) {
-            bctx.fillStyle = data['map'][i]['color']
-            bctx.fillRect(data['map'][i]['x']*10,data['map'][i]['y']*10,10,10)
+        for (let i = 0; i < backgroundMap.length; i++) {
+            for (let x = 0; x < backgroundMap[i].length; x++) {
+                bctx.fillStyle = backgroundMap[i][x]['color']
+                bctx.fillRect(i*10,x*10,10,10)
+            }
         }
     }
 })
@@ -76,16 +82,11 @@ hoverground.onmousedown = function (e) {
     }
 
     //displaying data of selected entity
-    for (let i = 0; i < foregroundMap.length; i++) {
-        if(typeof foregroundMap[i] !== 'undefined'){
-            if(foregroundMap[i]['x'] == roundedX && foregroundMap[i]['y'] == roundedY){
-                selectedDisplay.innerHTML = JSON.stringify(foregroundMap[i])
-                break
-            }
-            else{
-                selectedDisplay.innerHTML = ''
-            }
-        }
+    if(JSON.stringify(foregroundMap[roundedX][roundedY]) == "{}"){
+        selectedDisplay.innerHTML = ''
+    }
+    else{
+        selectedDisplay.innerHTML = JSON.stringify(foregroundMap[roundedX][roundedY])
     }
 }
 
@@ -105,29 +106,20 @@ hoverground.onmousemove = function (e) {
     hoverDisplay.innerHTML = "X: " + roundedX + " Y: " + roundedY
 
     //the entity select cursor
-    for (let i = 0; i < backgroundMap.length; i++) {
-        if(backgroundMap[i]['x'] == roundedX && backgroundMap[i]['y'] == roundedY){
-            hovergroundMap = []
-            hovergroundMap.push({x: backgroundMap[i]['x'], y: backgroundMap[i]['y'], color: 'yellow'})
-            hctx.clearRect(0,0, hoverground.width, hoverground.height)
-            for (let z = 0; z < hovergroundMap.length; z++) {
-                hctx.fillStyle = hovergroundMap[z]['color']
-                hctx.fillRect(hovergroundMap[z]['x']*10,hovergroundMap[z]['y']*10,10,10)
-            }
-        }
-    }  
+    hovergroundMap = []
+    hovergroundMap.push({x: roundedX, y: roundedY, color: 'yellow'})
+    hctx.clearRect(0,0, hoverground.width, hoverground.height)
+    for (let z = 0; z < hovergroundMap.length; z++) {
+        hctx.fillStyle = hovergroundMap[z]['color']
+        hctx.fillRect(hovergroundMap[z]['x']*10,hovergroundMap[z]['y']*10,10,10)
+    }
 
     //displaying the entity currently hovering over
-    for (let i = 0; i < foregroundMap.length; i++) {
-        if(typeof foregroundMap[i] !== 'undefined'){
-            if(foregroundMap[i]['x'] == roundedX && foregroundMap[i]['y'] == roundedY){
-                hoveredEntityDisplay.innerHTML = foregroundMap[i]['name']
-                break
-            }
-            else{
-                hoveredEntityDisplay.innerHTML = ''
-            }
-        }
+    if(typeof foregroundMap[roundedX][roundedY]['name'] != 'undefined'){
+        hoveredEntityDisplay.innerHTML = foregroundMap[roundedX][roundedY]['name']
+    }
+    else{
+        hoveredEntityDisplay.innerHTML = ''
     }
 }
 
@@ -135,22 +127,12 @@ hoverground.onmousemove = function (e) {
 setInterval(() => {
     let selectedDisplayText = selectedDisplay.innerText
     if(selectedDisplayText != ''){
-        let object = JSON.parse(selectedDisplayText)
-        if(object['type'] == 'bot'){
-            for (let i = 0; i < foregroundMap.length; i++) {
-                if(foregroundMap[i]['name'] == object['name']){
-                    selectedDisplay.innerHTML = JSON.stringify(foregroundMap[i])
-                    break
-                }
-            }
+        let object = JSON.stringify(JSON.parse(selectedDisplayText))
+        if(object == "{}"){
+            selectedDisplay.innerHTML = ''
         }
         else{
-            for (let i = 0; i < foregroundMap.length; i++) {
-                if(foregroundMap[i]['x'] == object['x'] && foregroundMap[i]['y'] == object['y']){
-                    selectedDisplay.innerHTML = JSON.stringify(foregroundMap[i])
-                    break
-                }
-            }
+            selectedDisplay.innerHTML = foregroundMap[object['x']][object['y']]
         }
     }
 }, 1000/60)

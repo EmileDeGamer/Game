@@ -49,7 +49,6 @@ let CustomBot = require("./classes/CustomBot-Henk")
 let EnergyGenerator = require("./classes/EnergyGeneratorBase")
 
 let background = [], foreground = [], bots = [], generators = []
-let coordX = 0, coordY = 0
 let spawnX = 49, spawnY = 49
 let maxX = 99
 let maxY = 99
@@ -58,18 +57,20 @@ let mapSizeY = maxY + 1
 let pieceSize = 10 //in pixels
 
 for (let i = 0; i < mapSizeX; i++) {
+    let backgroundRow = []
+    let foregroundRow = []
     for (let x = 0; x < mapSizeY; x++) {
-        background.push({x:coordX,y:coordY,color:"lightblue"})
-        coordX++
+        backgroundRow.push({color:'lightblue'})
+        foregroundRow.push({})
     }
-    coordY++
-    coordX=0
+    background.push(backgroundRow)
+    foreground.push(foregroundRow)
 }
 
 for (let i = 0; i < 250; i++) {
     let energyGenerator = new EnergyGenerator(Math.floor(Math.random() * maxX), Math.floor(Math.random() * maxY), 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100), 0)
     generators.push(energyGenerator)
-    foreground.push({x:generators[i]['x'], y:generators[i]['y'], name:generators[i]['name'], color:generators[i]['color'], generationInterval:generators[i]['generationInterval'], maxEnergy:generators[i]['maxEnergy'], currentEnergy:generators[i]['currentEnergy'], type:generators[i]['type']})
+    foreground[generators[i]['x']][generators[i]['y']] = generators[i]
 }
 
 io.on('connection', function(socket){
@@ -87,15 +88,22 @@ io.on('connection', function(socket){
     //#region update maps
     setInterval(() => {
         socket.emit('updateMap', {map:background, name:'background'})
-    }, 1000/6)
+    }, 1000/60)
 
     setInterval(() => {
         foreground = []
+        for (let i = 0; i < mapSizeX; i++) {
+            let foregroundRow = []
+            for (let x = 0; x < mapSizeY; x++) {
+                foregroundRow.push({})
+            }
+            foreground.push(foregroundRow)
+        }
         for (let i = 0; i < generators.length; i++) {
-            foreground.push({x:generators[i]['x'], y:generators[i]['y'], name:generators[i]['name'], color:generators[i]['color'], generationInterval:generators[i]['generationInterval'], maxEnergy:generators[i]['maxEnergy'], currentEnergy:generators[i]['currentEnergy'], type:generators[i]['type']})
+            foreground[generators[i]['x']][generators[i]['y']] = generators[i]
         }
         for (let x = 0; x < bots.length; x++) {
-            foreground.push({x:bots[x]['x'], y:bots[x]['y'], color:'black', name:bots[x]['name'], owner:bots[x]['owner'], type:bots[x]['type']})
+            foreground[bots[x]['x']][bots[x]['y']] = bots[x]
         }
         io.emit('updateMap', {map:foreground, name:'foreground'})
     }, 1000/60)
@@ -111,8 +119,8 @@ function checkOnDuplicateName(data, attempt){
     }
 }
 
-for (let i = 0; i < 1; i++) {
-    checkOnDuplicateName('test', 0)
+for (let i = 0; i < 250; i++) {
+    bots.push(new Bot('test', spawnX, spawnY, 'test'))
 }
 
 for (let x = 0; x < bots.length; x++) {
@@ -126,35 +134,19 @@ function moveEntityTowardsTarget(bot, target){
         setTimeout(function() { 
             if(route[i] == 'north'){
                 bot['y']--
-                for (let i = 0; i < background.length; i++) {
-                    if(background[i]['x'] == bot['x'] && background[i]['y'] == bot['y']){
-                        background[i]['color'] = 'green'
-                    }
-                }
+                background[bot['x']][bot['y']]['color'] = 'green'
             }
             else if (route[i] == 'east'){
                 bot['x']++
-                for (let i = 0; i < background.length; i++) {
-                    if(background[i]['x'] == bot['x'] && background[i]['y'] == bot['y']){
-                        background[i]['color'] = 'green'
-                    }
-                }
+                background[bot['x']][bot['y']]['color'] = 'green'
             }
             else if (route[i] == 'south'){
                 bot['y']++
-                for (let i = 0; i < background.length; i++) {
-                    if(background[i]['x'] == bot['x'] && background[i]['y'] == bot['y']){
-                        background[i]['color'] = 'green'
-                    }
-                }
+                background[bot['x']][bot['y']]['color'] = 'green'
             }
             else if (route[i] == 'west'){
                 bot['x']--
-                for (let i = 0; i < background.length; i++) {
-                    if(background[i]['x'] == bot['x'] && background[i]['y'] == bot['y']){
-                        background[i]['color'] = 'green'
-                    }
-                }
+                background[bot['x']][bot['y']]['color'] = 'green'
             }
         },  100 * i) 
     }
@@ -162,28 +154,21 @@ function moveEntityTowardsTarget(bot, target){
 
 function translateMapToText(target){
     let grid = []
-    let arr = []
     for (let i = 0; i < background.length; i++) {
-        arr.push('valid')
-        if(arr.length == mapSizeX){
-            grid.push(arr)
-            arr = []
+        let row = []
+        for (let x = 0; x < background[i].length; x++) {
+            row.push('valid')
         }
+        grid.push(row)
     }
-    for (let i = 0; i < background.length; i++) {
-        for (let x = 0; x < foreground.length; x++) {
-            if(foreground[x]['x'] == background[i]['x'] && foreground[x]['y'] == background[i]['y']){
-                if(foreground[x]['type'] == 'generator'){
-                    if(grid[foreground[x]['x']][foreground[x]['y']] == 'valid'){
-                        grid[foreground[x]['x']][foreground[x]['y']] = 'blocked'
-                    }
-                }
+    for (let i = 0; i < foreground.length; i++) {
+        for (let x = 0; x < foreground[i].length; x++) {
+            if(foreground[i][x]['type'] == 'generator' || foreground[i][x]['type'] == 'bot'){
+                grid[i][x] = 'blocked'
             }
         }
-        if(target['x'] == background[i]['x'] && target['y'] == background[i]['y']){
-            grid[target['x']][target['y']] = ('goal')
-        }
     }
+    grid[target['x']][target['y']] = ('goal')
     return grid
 }
 
@@ -201,16 +186,16 @@ function findShortestPath(startEntity, target){
 
     while(queue.length > 0){
         let currentLocation = queue.shift()
-
         let directions = ['north', 'east', 'south', 'west']
         for (let i = 0; i < directions.length; i++) {
             let newLocation = retrieveNeighboursFromDirection(currentLocation, directions[i], grid)
             if(newLocation['status'] == 'goal'){
+                grid = []
                 return newLocation['path']
             }
             else if(newLocation.status == 'valid'){
                 queue.push(newLocation)
-            }
+            }   
         }
     }
 
@@ -245,11 +230,7 @@ function retrieveNeighboursFromDirection(currentLocation, direction, grid){
     newLocation['status'] = retrieveLocationStatus(newLocation, grid)
 
     if(newLocation['status'] === 'valid'){
-        for (let i = 0; i < background.length; i++) {
-            if(background[i]['x'] == newLocation['x'] && background[i]['y'] == newLocation['y']){
-                background[i]['color'] = 'blue'
-            }
-        }
+        background[newLocation['x']][newLocation['y']]['color'] = 'blue'
         grid[newLocation['x']][newLocation['y']] = 'visited'
     }
 

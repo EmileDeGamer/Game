@@ -5,6 +5,7 @@ module.exports = class Bot {
         this.y = y //the current y
         this.owner = owner //maybe a user with different name than bot when using accounts
         this.type = 'bot' //for checking client side how to update the selected entity
+        this.color = 'black'
     }    
 
     /*moveTowardsEntity(entity){
