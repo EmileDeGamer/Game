@@ -51,28 +51,29 @@ let EnergyGenerator = require("./classes/EnergyGeneratorBase")
 let background = [], foreground = [], bots = [], generators = []
 let coordX = 0, coordY = 0
 let spawnX = 49, spawnY = 49
-for (let i = 0; i < 100; i++) {
-    for (let x = 0; x < 100; x++) {
+let maxX = 99
+let maxY = 99
+let mapSizeX = maxX + 1
+let mapSizeY = maxY + 1
+for (let i = 0; i < mapSizeX; i++) {
+    for (let x = 0; x < mapSizeY; x++) {
         background.push({x:coordX,y:coordY,color:"lightblue"})
         coordX++
     }
     coordY++
     coordX=0
 }
-console.log(background.length)
 
 for (let i = 0; i < 250; i++) {
     let energyGenerator = new EnergyGenerator(Math.floor(Math.random() * 99), Math.floor(Math.random() * 99), 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100), 0)
     generators.push(energyGenerator)
+    foreground.push({x:generators[i]['x'], y:generators[i]['y'], name:generators[i]['name'], color:generators[i]['color'], generationInterval:generators[i]['generationInterval'], maxEnergy:generators[i]['maxEnergy'], currentEnergy:generators[i]['currentEnergy'], type:generators[i]['type']})
 }
 
-/*for (let i = 0; i < 100; i++) {
-    background[i]['color'] = 'red'
-    background[i+9900]['color'] = 'red'
-    background[i*100]['color'] = 'red'
-    background[i*100+99]['color'] = 'red'
-}*/
-
+/*let energyGenerator = new EnergyGenerator(99, 99, 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100), 0)
+generators.push(energyGenerator)
+foreground.push({x:generators[0]['x'], y:generators[0]['y'], name:generators[0]['name'], color:generators[0]['color'], generationInterval:generators[0]['generationInterval'], maxEnergy:generators[0]['maxEnergy'], currentEnergy:generators[0]['currentEnergy'], type:generators[0]['type']})
+*/
 let colors = ['red', 'orange', 'yellow', 'green', 'lightblue', 'blue', 'purple', 'pink']
 let randomIndexOfColor = Math.floor(Math.random() * colors.length)
 
@@ -159,24 +160,201 @@ for (let i = 0; i < 50; i++) {
 
 setTimeout(() => {
     for (let i = 0; i < bots.length; i++) {
-        retrieveNeighboursAndCalculateDistance(bots[i], generators[0])
+        //console.log(findBestPath(bots[0], generators[0]))
+        //retrieveNeighboursAndCalculateDistance(bots[i], generators[0])
+        
     }
-    console.log(generators[0])
+    translateMapToText(generators[0])
+    let route = findShortestPath(bots[0])
+    for (let i = 0; i < route.length; i++) {
+        if(route[i] == 'north'){
+            bots[0]['y']--
+            for (let i = 0; i < background.length; i++) {
+                if(background[i]['x'] == bots[0]['x'] && background[i]['y'] == bots[0]['y']){
+                    background[i]['color'] = 'green'
+                }
+            }
+        }
+        else if (route[i] == 'east'){
+            bots[0]['x']++
+            for (let i = 0; i < background.length; i++) {
+                if(background[i]['x'] == bots[0]['x'] && background[i]['y'] == bots[0]['y']){
+                    background[i]['color'] = 'green'
+                }
+            }
+        }
+        else if (route[i] == 'south'){
+            bots[0]['y']++
+            for (let i = 0; i < background.length; i++) {
+                if(background[i]['x'] == bots[0]['x'] && background[i]['y'] == bots[0]['y']){
+                    background[i]['color'] = 'green'
+                }
+            }
+        }
+        else if (route[i] == 'west'){
+            bots[0]['x']--
+            for (let i = 0; i < background.length; i++) {
+                if(background[i]['x'] == bots[0]['x'] && background[i]['y'] == bots[0]['y']){
+                    background[i]['color'] = 'green'
+                }
+            }
+        }
+    }
 }, 1000)
 
+let grid = []
+function translateMapToText(target){
+    let arr = []
+    for (let i = 0; i < background.length; i++) {
+        let amount = 0
+        if(target['x'] == background[i]['x'] && target['y'] == background[i]['y']){
+            arr.push('goal')
+            amount++
+        }
+        
+        if(amount == 0){
+            arr.push('valid')
+        }
+        if(arr.length == mapSizeX){
+            grid.push(arr)
+            arr = []
+        }
+    }
+    for (let i = 0; i < background.length; i++) {
+        for (let x = 0; x < foreground.length; x++) {
+            if(foreground[x]['x'] == background[i]['x'] && foreground[x]['y'] == background[i]['y']){
+                if(foreground[x]['type'] == 'generator'){
+                    if(grid[foreground[x]['x']][foreground[x]['y']] == 'valid'){
+                        grid[foreground[x]['x']][foreground[x]['y']] = 'blocked'
+                    }
+                }
+            }
+        }
+    }
+    return grid
+}
+
+let findShortestPath = function(startEntity){
+    let location = {
+        x: startEntity['x'],
+        y: startEntity['y'],
+        path: [],
+        status: 'start'
+    }
+
+    let queue = [location]
+
+    while(queue.length > 0){
+        let currentLocation = queue.shift()
+
+        let directions = ['north', 'east', 'south', 'west']
+        for (let i = 0; i < directions.length; i++) {
+            let newLocation = retrieveNeighboursFromDirection(currentLocation, directions[i])
+            if(newLocation['status'] == 'goal'){
+                return newLocation.path
+            }
+            else if(newLocation.status == 'valid'){
+                queue.push(newLocation)
+            }
+        }
+    }
+
+    return false
+}
+
+let retrieveNeighboursFromDirection = function(currentLocation, direction){
+    let newPath = currentLocation.path.slice()
+    newPath.push(direction)
+    let x = currentLocation['x']
+    let y = currentLocation['y']
+
+    if(direction == 'east'){
+        x+=1
+    }
+    else if (direction == 'west'){
+        x-=1
+    }
+    else if (direction == 'south'){
+        y+=1
+    }
+    else if (direction == 'north'){
+        y-=1
+    }
+    
+    let newLocation = {
+        x: x,
+        y: y,
+        path: newPath,
+        status: 'unknown'
+    }
+    newLocation['status'] = retrieveLocationStatus(newLocation)
+
+    if(newLocation['status'] === 'valid'){
+        grid[newLocation['x']][newLocation['y']] = 'visited'
+    }
+
+    return newLocation
+}
+
+let retrieveLocationStatus = function(location){
+    if(location['x'] >= mapSizeX || location['x'] < 0 || location['y'] >= mapSizeY || location['y'] < 0){
+        return 'invalid'
+    }
+    else if(grid[location['x']][location['y']] == 'valid'){
+        for (let i = 0; i < background.length; i++) {
+            if(background[i]['x'] == location['x'] && background[i]['y'] == location['y']){
+                background[i]['color'] = 'blue'
+            }
+        }
+        return 'valid'
+    }
+    else if (grid[location['x']][location['y']] == 'goal'){
+        for (let i = 0; i < background.length; i++) {
+            if(background[i]['x'] == location['x'] && background[i]['y'] == location['y']){
+                background[i]['color'] = 'green'
+            }
+        }
+        return 'goal'
+    }
+    else if (grid[location['x']][location['y']] == 'blocked'){
+        for (let i = 0; i < background.length; i++) {
+            if(background[i]['x'] == location['x'] && background[i]['y'] == location['y']){
+                background[i]['color'] = 'red'
+            }
+        }
+        return 'blocked'
+    }
+}
+
+/*
 function retrieveNeighboursAndCalculateDistance(a, b){
     for (let i = 0; i < background.length; i++) {
+        for (let x = 0; x < foreground.length; x++) {
+            if(foreground[x]['x'] == background[i]['x'] && foreground[x]['y'] == background[i]['y']){
+                if(foreground[x]['type'] == 'generator'){
+                    background[i]['color'] = 'red'
+                }
+            }
+        }
         if(background[i]['x'] == a['x'] + 1 && background[i]['y'] == a['y']){
-            calculateFCost(i,b)
+            if(background[i]['color'] != 'red'){
+                calculateFCost(i,b)
+            }
         }
-        else if(background[i]['x'] == a['x'] - 1 && background[i]['y'] == a['y']){
-            calculateFCost(i,b)
+        if(background[i]['x'] == a['x'] - 1 && background[i]['y'] == a['y']){
+            if(background[i]['color'] != 'red'){
+                calculateFCost(i,b)
+            }
         }
-        else if(background[i]['x'] == a['x'] && background[i]['y'] == a['y'] + 1){
-            calculateFCost(i,b)
+        if(background[i]['x'] == a['x'] && background[i]['y'] == a['y'] + 1){
+            if(background[i]['color'] != 'red'){
+                calculateFCost(i,b)
+            }
         }
-        else if(background[i]['x'] == a['x'] && background[i]['y'] == a['y'] - 1){
-            calculateFCost(i,b)
+        if(background[i]['x'] == a['x'] && background[i]['y'] == a['y'] - 1){
+            if(background[i]['color'] != 'red'){
+                calculateFCost(i,b)
+            }
         }
     }
 
@@ -184,63 +362,54 @@ function retrieveNeighboursAndCalculateDistance(a, b){
     for (let i = 0; i < background.length; i++) {
         if(background[i]['color'] != 'red' && background[i]['color'] != 'blue'){
             if(typeof background[i]['fCost'] != 'undefined'){
-                if(costs.indexOf(background[i]['fCost']) == -1){
-                    costs.push(background[i]['fCost'])
-                }
+                costs.push(background[i]['fCost'])
             }
         }
     }
 
-    let lowestValue = Math.min.apply(Math, costs) 
-
-    for (let i = 0; i < background.length; i++) {
-        if(typeof background[i]['fCost'] != 'undefined'){
-            if(background[i]['fCost'] == lowestValue){
-                //first check if nothing is on the way
-                //todo
-                for (let x = 0; x < foreground.length; x++) {
-                    if(foreground[x]['x'] == background[i]['x'] && foreground[x]['y'] == background[i]['y']){
-                        if(foreground[x]['type'] == 'generator'){
-                            costs.splice(costs.indexOf(lowestValue, 1))
-                            lowestValue = Math.min.apply(Math, costs)
-                            
-                        }
+    if(costs.length > 0){
+        let lowestValue = Math.min.apply(Math, costs) 
+        for (let i = 0; i < background.length; i++) {
+            if(typeof background[i]['fCost'] != 'undefined'){
+                if(background[i]['fCost'] == lowestValue){
+                    background[i]['color'] = 'blue'
+                    if(background[i]['x'] == b['x'] && background[i]['y'] == b['y']){
+                        break
+                    }
+                    else if(background[i]['x'] + 1 == b['x'] && background[i]['y'] == b['y']){
+                        break
+                    }
+                    else if(background[i]['x'] - 1 == b['x'] && background[i]['y'] == b['y']){
+                        break
+                    }
+                    else if(background[i]['x'] == b['x'] && background[i]['y'] + 1 == b['y']){
+                        break
+                    }
+                    else if(background[i]['x'] == b['x'] && background[i]['y'] - 1 == b['y']){
+                        break
+                    }
+                    else{
+                        retrieveNeighboursAndCalculateDistance(background[i], b)
+                        break
                     }
                 }
-
-                background[i]['color'] = 'blue'
-                if(background[i]['x'] == b['x'] && background[i]['y'] == b['y']){
-                    break
-                }
-                /*else if(background[i]['x'] + 1 == b['x'] && background[i]['y'] == b['y']){
-                    break
-                }
-                else if(background[i]['x'] - 1 == b['x'] && background[i]['y'] == b['y']){
-                    break
-                }
-                else if(background[i]['x'] == b['x'] && background[i]['y'] + 1 == b['y']){
-                    break
-                }
-                else if(background[i]['x'] == b['x'] && background[i]['y'] - 1 == b['y']){
-                    break
-                }*/
-                else{
-                    retrieveNeighboursAndCalculateDistance(background[i], b)
-                    break
-                }
             }
-            
         }
-    }
-    for (let i = 0; i < background.length; i++) {
-        if(background[i]['color'] == 'green'){
-            if(typeof background[i]['fCost'] != 'undefined'){
-                if (background[i]['fCost'] != lowestValue){
-                    background[i]['color'] = 'red'
+        for (let i = 0; i < background.length; i++) {
+            if(background[i]['color'] == 'green'){
+                if(typeof background[i]['fCost'] != 'undefined'){
+                    if (background[i]['fCost'] != lowestValue){
+                        background[i]['color'] = 'red'
+                    }
                 }
             }
         }
     }
+    else{
+        console.log('stuck')
+    }
+    
+    
 }
 
 function calculateFCost(i,b){
@@ -256,4 +425,4 @@ function calculateManhattanDistance(a,b){
     let manhattanY = Math.abs(a['y'] - b['y'])
     let manhattan = Math.abs(manhattanX + manhattanY)
     return manhattan
-}
+}*/
