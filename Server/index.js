@@ -148,7 +148,7 @@ function moveEntityTowardsTarget(bot, target){
                 bot['x']--
                 background[bot['x']][bot['y']]['color'] = 'green'
             }
-        },  100 * i) 
+        }, 100 * i) 
     }
 }
 
