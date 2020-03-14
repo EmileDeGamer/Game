@@ -111,7 +111,7 @@ function checkOnDuplicateName(data, attempt){
     }
 }
 
-for (let i = 0; i < 50; i++) {
+for (let i = 0; i < 1; i++) {
     checkOnDuplicateName('test', 0)
 }
 
