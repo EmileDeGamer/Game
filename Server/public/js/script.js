@@ -15,7 +15,7 @@ let hoveredEntityDisplay = document.getElementById('hoveredEntityDisplay')
 let hoverDisplay = document.getElementById('hoverDisplay')
 let selectedDisplay = document.getElementById('selectedDisplay')
 
-let pieceSize = 10 //in pixels
+let pieceSize
 let maxX
 let maxY
 let mapSizeX

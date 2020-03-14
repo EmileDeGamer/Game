@@ -67,7 +67,7 @@ for (let i = 0; i < mapSizeX; i++) {
     foreground.push(foregroundRow)
 }
 
-for (let i = 0; i < 250; i++) {
+for (let i = 0; i < 1000; i++) { //testing amount
     let energyGenerator = new EnergyGenerator(Math.floor(Math.random() * maxX), Math.floor(Math.random() * maxY), 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100), 0)
     generators.push(energyGenerator)
     foreground[generators[i]['x']][generators[i]['y']] = generators[i]
@@ -119,7 +119,7 @@ function checkOnDuplicateName(data, attempt){
     }
 }
 
-for (let i = 0; i < 250; i++) {
+for (let i = 0; i < 250; i++) { //testing amount
     bots.push(new Bot('test', spawnX, spawnY, 'test'))
 }
 
