@@ -1,10 +1,45 @@
-//must be removed after user can code bots
-let botname = prompt('Tell me your bot name', 'bot name')
+//#region variables
+let background = document.getElementById('background')
+let foreground = document.getElementById('foreground')
+let hoverground = document.getElementById('hoverground')
+
+let bctx = background.getContext('2d')
+let fctx = foreground.getContext('2d')
+let hctx = hoverground.getContext('2d')
+
+let foregroundMap = []
+let backgroundMap = []
+let hovergroundMap = []
+
+let hoveredEntityDisplay = document.getElementById('hoveredEntityDisplay')
+let hoverDisplay = document.getElementById('hoverDisplay')
+let selectedDisplay = document.getElementById('selectedDisplay')
+
+let pieceSize = 10 //in pixels
+let maxX
+let maxY
+let mapSizeX
+let mapSizeY
+//#endregion
 
 let socket = io()
 
 socket.on('connect', function(){
     console.log('connection made!')
+})
+
+socket.on('createMap', function(data){
+    maxX = data['maxX']
+    maxY = data['maxY']
+    mapSizeX = data['maxY']+1
+    mapSizeY = data['maxY']+1
+    pieceSize = data['pieceSize']
+    background.width = mapSizeX*pieceSize
+    background.height = mapSizeY*pieceSize
+    foreground.width = mapSizeX*pieceSize
+    foreground.height = mapSizeY*pieceSize
+    hoverground.width = mapSizeX*pieceSize
+    hoverground.height = mapSizeY*pieceSize
 })
 
 socket.on('updateMap', function(data){
@@ -25,57 +60,6 @@ socket.on('updateMap', function(data){
         }
     }
 })
-
-//#region must be removed after user can code bots
-socket.on('changedNameTo', function(data){
-    botname = data
-})
-
-socket.emit('createMe', botname)
-//#endregion
-
-//#region variables
-let background = document.getElementById('background')
-let foreground = document.getElementById('foreground')
-let hoverground = document.getElementById('hoverground')
-
-let bctx = background.getContext('2d')
-let fctx = foreground.getContext('2d')
-let hctx = hoverground.getContext('2d')
-
-let foregroundMap = []
-let backgroundMap = []
-let hovergroundMap = []
-
-let hoveredEntityDisplay = document.getElementById('hoveredEntityDisplay')
-let hoverDisplay = document.getElementById('hoverDisplay')
-let selectedDisplay = document.getElementById('selectedDisplay')
-
-let pieceSize = 10 //in pixels
-let maxX = 99
-let maxY = 99
-let mapSizeX = maxX + 1
-let mapSizeY = maxY + 1
-//#endregion
-
-init()
-
-function init () {
-    background.width = mapSizeX*pieceSize
-    background.height = mapSizeY*pieceSize
-    foreground.width = mapSizeX*pieceSize
-    foreground.height = mapSizeY*pieceSize
-    hoverground.width = mapSizeX*pieceSize
-    hoverground.height = mapSizeY*pieceSize
-}
-
-//#region must be removed after user can code bots
-let buttons = [document.getElementById('w'), document.getElementById('a'), document.getElementById('s'), document.getElementById('d')]
-
-for (let i = 0; i < buttons.length; i++) {
-    buttons[i].onclick = function(){socket.emit('move', {direction:buttons[i].innerHTML,name:botname})}
-}
-//#endregion
 
 hoverground.onmousedown = function (e) {
     var rect = this.getBoundingClientRect(),
