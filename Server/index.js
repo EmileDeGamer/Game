@@ -100,7 +100,7 @@ io.on('connection', function(socket){
         }
         randomIndexOfColor = Math.floor(Math.random() * colors.length)*/
         socket.emit('updateMap', {map:background, name:'background'})
-    }, 1000)
+    }, 1000/6)
 
     //movement for testing later automatic by code from clients
     //#region optional
@@ -159,62 +159,53 @@ for (let i = 0; i < 50; i++) {
 }
 
 setTimeout(() => {
-    for (let i = 0; i < bots.length; i++) {
-        //console.log(findBestPath(bots[0], generators[0]))
-        //retrieveNeighboursAndCalculateDistance(bots[i], generators[0])
-        
-    }
-    translateMapToText(generators[0])
-    let route = findShortestPath(bots[0])
-    for (let i = 0; i < route.length; i++) {
-        if(route[i] == 'north'){
-            bots[0]['y']--
-            for (let i = 0; i < background.length; i++) {
-                if(background[i]['x'] == bots[0]['x'] && background[i]['y'] == bots[0]['y']){
-                    background[i]['color'] = 'green'
+    for (let x = 0; x < bots.length; x++) {
+        let route = findShortestPath(bots[x], generators[Math.floor(Math.random() * generators.length)])
+        for (let i = 0; i < route.length-1; i++) {
+            setTimeout(function() { 
+                if(route[i] == 'north'){
+                    bots[x]['y']--
+                    for (let i = 0; i < background.length; i++) {
+                        if(background[i]['x'] == bots[x]['x'] && background[i]['y'] == bots[x]['y']){
+                            background[i]['color'] = 'green'
+                        }
+                    }
                 }
-            }
-        }
-        else if (route[i] == 'east'){
-            bots[0]['x']++
-            for (let i = 0; i < background.length; i++) {
-                if(background[i]['x'] == bots[0]['x'] && background[i]['y'] == bots[0]['y']){
-                    background[i]['color'] = 'green'
+                else if (route[i] == 'east'){
+                    bots[x]['x']++
+                    for (let i = 0; i < background.length; i++) {
+                        if(background[i]['x'] == bots[x]['x'] && background[i]['y'] == bots[x]['y']){
+                            background[i]['color'] = 'green'
+                        }
+                    }
                 }
-            }
-        }
-        else if (route[i] == 'south'){
-            bots[0]['y']++
-            for (let i = 0; i < background.length; i++) {
-                if(background[i]['x'] == bots[0]['x'] && background[i]['y'] == bots[0]['y']){
-                    background[i]['color'] = 'green'
+                else if (route[i] == 'south'){
+                    bots[x]['y']++
+                    for (let i = 0; i < background.length; i++) {
+                        if(background[i]['x'] == bots[x]['x'] && background[i]['y'] == bots[x]['y']){
+                            background[i]['color'] = 'green'
+                        }
+                    }
                 }
-            }
-        }
-        else if (route[i] == 'west'){
-            bots[0]['x']--
-            for (let i = 0; i < background.length; i++) {
-                if(background[i]['x'] == bots[0]['x'] && background[i]['y'] == bots[0]['y']){
-                    background[i]['color'] = 'green'
+                else if (route[i] == 'west'){
+                    bots[x]['x']--
+                    for (let i = 0; i < background.length; i++) {
+                        if(background[i]['x'] == bots[x]['x'] && background[i]['y'] == bots[x]['y']){
+                            background[i]['color'] = 'green'
+                        }
+                    }
                 }
-            }
+            },  100 * i) 
         }
     }
 }, 1000)
 
-let grid = []
+//let grid = []
 function translateMapToText(target){
+    let grid = []
     let arr = []
     for (let i = 0; i < background.length; i++) {
-        let amount = 0
-        if(target['x'] == background[i]['x'] && target['y'] == background[i]['y']){
-            arr.push('goal')
-            amount++
-        }
-        
-        if(amount == 0){
-            arr.push('valid')
-        }
+        arr.push('valid')
         if(arr.length == mapSizeX){
             grid.push(arr)
             arr = []
@@ -230,11 +221,16 @@ function translateMapToText(target){
                 }
             }
         }
+        if(target['x'] == background[i]['x'] && target['y'] == background[i]['y']){
+            grid[target['x']][target['y']] = ('goal')
+        }
     }
     return grid
 }
 
-let findShortestPath = function(startEntity){
+let findShortestPath = function(startEntity, target){
+    let grid = translateMapToText(target)
+
     let location = {
         x: startEntity['x'],
         y: startEntity['y'],
@@ -249,7 +245,7 @@ let findShortestPath = function(startEntity){
 
         let directions = ['north', 'east', 'south', 'west']
         for (let i = 0; i < directions.length; i++) {
-            let newLocation = retrieveNeighboursFromDirection(currentLocation, directions[i])
+            let newLocation = retrieveNeighboursFromDirection(currentLocation, directions[i], grid)
             if(newLocation['status'] == 'goal'){
                 return newLocation.path
             }
@@ -262,7 +258,7 @@ let findShortestPath = function(startEntity){
     return false
 }
 
-let retrieveNeighboursFromDirection = function(currentLocation, direction){
+let retrieveNeighboursFromDirection = function(currentLocation, direction, grid){
     let newPath = currentLocation.path.slice()
     newPath.push(direction)
     let x = currentLocation['x']
@@ -287,7 +283,7 @@ let retrieveNeighboursFromDirection = function(currentLocation, direction){
         path: newPath,
         status: 'unknown'
     }
-    newLocation['status'] = retrieveLocationStatus(newLocation)
+    newLocation['status'] = retrieveLocationStatus(newLocation, grid)
 
     if(newLocation['status'] === 'valid'){
         grid[newLocation['x']][newLocation['y']] = 'visited'
@@ -296,32 +292,32 @@ let retrieveNeighboursFromDirection = function(currentLocation, direction){
     return newLocation
 }
 
-let retrieveLocationStatus = function(location){
+let retrieveLocationStatus = function(location, grid){
     if(location['x'] >= mapSizeX || location['x'] < 0 || location['y'] >= mapSizeY || location['y'] < 0){
         return 'invalid'
     }
     else if(grid[location['x']][location['y']] == 'valid'){
-        for (let i = 0; i < background.length; i++) {
+        /*for (let i = 0; i < background.length; i++) {
             if(background[i]['x'] == location['x'] && background[i]['y'] == location['y']){
                 background[i]['color'] = 'blue'
             }
-        }
+        }*/
         return 'valid'
     }
     else if (grid[location['x']][location['y']] == 'goal'){
-        for (let i = 0; i < background.length; i++) {
+        /*for (let i = 0; i < background.length; i++) {
             if(background[i]['x'] == location['x'] && background[i]['y'] == location['y']){
-                background[i]['color'] = 'green'
+                //background[i]['color'] = 'green'
             }
-        }
+        }*/
         return 'goal'
     }
     else if (grid[location['x']][location['y']] == 'blocked'){
-        for (let i = 0; i < background.length; i++) {
+        /*for (let i = 0; i < background.length; i++) {
             if(background[i]['x'] == location['x'] && background[i]['y'] == location['y']){
                 background[i]['color'] = 'red'
             }
-        }
+        }*/
         return 'blocked'
     }
 }
