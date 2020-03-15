@@ -49,13 +49,16 @@ let CustomBot = require("./classes/CustomBot-Henk")
 let EnergyGenerator = require("./classes/EnergyGeneratorBase")
 
 let background = [], foreground = [], bots = [], generators = []
-let spawnX = 50, spawnY = 50
-let maxX = 99
-let maxY = 99
+let maxX = 199
+let maxY = 199
 let mapSizeX = maxX + 1
 let mapSizeY = maxY + 1
+let spawnX = Math.floor(mapSizeX / 2), spawnY = Math.floor(mapSizeY / 2)
 let pieceSize = 10 //in pixels
 
+let d1 = new Date()
+let d2 = new Date()
+console.log("Generating foreground and background...")
 for (let i = 0; i < mapSizeX; i++) {
     let backgroundRow = []
     let foregroundRow = []
@@ -66,8 +69,10 @@ for (let i = 0; i < mapSizeX; i++) {
     background.push(backgroundRow)
     foreground.push(foregroundRow)
 }
-
-for (let i = 0; i < 2500; i++) { //testing amount
+console.log("Generating foreground and background took " + (d2.getTime() - d1.getTime()) + " ms")
+console.log("Generating energy generators...")
+d1 = new Date()
+for (let i = 0; i < 5000; i++) { //testing amount
     let energyGenerator = new EnergyGenerator(0, 0, 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100), 0)
     generateItemOnAvailablePlace(energyGenerator, generators)
 }
@@ -83,6 +88,8 @@ function generateItemOnAvailablePlace(entity, array){
         generateItemOnAvailablePlace(entity, array)
     }
 }
+d2 = new Date()
+console.log("Generating energy generators took " + (d2.getTime() - d1.getTime()) + " ms")
 
 io.on('connection', function(socket){
     console.log('connection made!')  
@@ -120,26 +127,29 @@ io.on('connection', function(socket){
     }, 1000/10)
     //#endregion
 })
-
+console.log("Creating bots...")
+d1 = new Date()
 function checkOnDuplicateName(data, attempt){
-    if(bots.map(function(e) { return e.name; }).indexOf(data) == -1){
+    /*if(bots.map(function(e) { return e.name; }).indexOf(data) == -1){
         bots.push(new Bot(data, spawnX, spawnY, data))
     }
-    else{
-        if(attempt == 0){
+    else{*/
+        /*if(attempt == 0){
             data = data+0
         }
         else{
             data = data.replace(attempt-1, attempt)
-        }
+        }*/
+        data+attempt
         attempt++
-        checkOnDuplicateName(data, attempt)
-    }
+        bots.push(new Bot(data, spawnX, spawnY, data))
+    //checkOnDuplicateName(data, attempt)
+    //}
 }
 
-for (let i = 0; i < 250; i++) { //testing amount
-    checkOnDuplicateName('test', 0)
-}
+for (let i = 0; i < 500; i++) { //testing amount
+    checkOnDuplicateName('test', i)
+}    
 
 for (let x = 0; x < bots.length; x++) {
     moveEntityTowardsTarget(bots[x], generators[Math.floor(Math.random() * generators.length)])
@@ -276,3 +286,6 @@ function retrieveLocationStatus(location, grid){
     }
 }
 //#endregion
+
+d2 = new Date()
+console.log("Generating bots and finding their shortest path took " + (d2.getTime() - d1.getTime()) + " ms")
