@@ -67,7 +67,7 @@ for (let i = 0; i < mapSizeX; i++) {
     foreground.push(foregroundRow)
 }
 
-for (let i = 0; i < 1000; i++) { //testing amount
+for (let i = 0; i < 5000; i++) { //testing amount
     let energyGenerator = new EnergyGenerator(Math.floor(Math.random() * maxX), Math.floor(Math.random() * maxY), 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100), 0)
     generators.push(energyGenerator)
     foreground[generators[i]['x']][generators[i]['y']] = generators[i]
@@ -126,29 +126,33 @@ for (let i = 0; i < 250; i++) { //testing amount
 for (let x = 0; x < bots.length; x++) {
     moveEntityTowardsTarget(bots[x], generators[Math.floor(Math.random() * generators.length)])
 }
-
 //#region pathfinding
 function moveEntityTowardsTarget(bot, target){
     let route = findShortestPath(bot, target)
-    for (let i = 0; i < route.length-1; i++) {
-        setTimeout(function() { 
-            if(route[i] == 'north'){
-                bot['y']--
-                background[bot['x']][bot['y']]['color'] = 'green'
-            }
-            else if (route[i] == 'east'){
-                bot['x']++
-                background[bot['x']][bot['y']]['color'] = 'green'
-            }
-            else if (route[i] == 'south'){
-                bot['y']++
-                background[bot['x']][bot['y']]['color'] = 'green'
-            }
-            else if (route[i] == 'west'){
-                bot['x']--
-                background[bot['x']][bot['y']]['color'] = 'green'
-            }
-        }, 100 * i) 
+    if(!route){
+        //when it can't reach target
+    }
+    else{
+        for (let i = 0; i < route.length-1; i++) {
+            setTimeout(function() { 
+                if(route[i] == 'north'){
+                    bot['y']--
+                    background[bot['x']][bot['y']]['color'] = 'green'
+                }
+                else if (route[i] == 'east'){
+                    bot['x']++
+                    background[bot['x']][bot['y']]['color'] = 'green'
+                }
+                else if (route[i] == 'south'){
+                    bot['y']++
+                    background[bot['x']][bot['y']]['color'] = 'green'
+                }
+                else if (route[i] == 'west'){
+                    bot['x']--
+                    background[bot['x']][bot['y']]['color'] = 'green'
+                }
+            }, 100 * i) 
+        }
     }
 }
 
@@ -191,6 +195,7 @@ function findShortestPath(startEntity, target){
             let newLocation = retrieveNeighboursFromDirection(currentLocation, directions[i], grid)
             if(newLocation['status'] == 'goal'){
                 grid = []
+                queue = []
                 return newLocation['path']
             }
             else if(newLocation.status == 'valid'){

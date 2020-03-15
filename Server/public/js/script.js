@@ -145,4 +145,4 @@ setInterval(() => {
             selectedDisplay.innerHTML = ''
         }
     }
-}, 1000/10)
+}, 1000)
