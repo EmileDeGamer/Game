@@ -50,7 +50,7 @@ socket.on('updateMap', function(data){
             for (let x = 0; x < foregroundMap[i].length; x++) {
                 if(typeof foregroundMap[i][x]['color'] != 'undefined'){
                     fctx.fillStyle = foregroundMap[i][x]['color']
-                    fctx.fillRect(i*10,x*10,10,10)
+                    fctx.fillRect(i*pieceSize,x*pieceSize,pieceSize,pieceSize)
                 }
             }
         }
@@ -61,7 +61,7 @@ socket.on('updateMap', function(data){
         for (let i = 0; i < backgroundMap.length; i++) {
             for (let x = 0; x < backgroundMap[i].length; x++) {
                 bctx.fillStyle = backgroundMap[i][x]['color']
-                bctx.fillRect(i*10,x*10,10,10)
+                bctx.fillRect(i*pieceSize,x*pieceSize,pieceSize,pieceSize)
             }
         }
     }
@@ -72,8 +72,8 @@ hoverground.onmousedown = function (e) {
     x = e.clientX - rect.left,
     y = e.clientY - rect.top,
     i = 0, r;
-    let roundedX = Math.floor(x / 10)
-    let roundedY = Math.floor(y / 10)
+    let roundedX = Math.floor(x / pieceSize)
+    let roundedY = Math.floor(y / pieceSize)
     if(roundedX > maxX){
         roundedX = maxX
     }
@@ -95,8 +95,8 @@ hoverground.onmousemove = function (e) {
     x = e.clientX - rect.left,
     y = e.clientY - rect.top,
     i = 0, r;
-    let roundedX = Math.floor(x / 10)
-    let roundedY = Math.floor(y / 10)
+    let roundedX = Math.floor(x / pieceSize)
+    let roundedY = Math.floor(y / pieceSize)
     if(roundedX > maxX){
         roundedX = maxX
     }
@@ -111,7 +111,7 @@ hoverground.onmousemove = function (e) {
     hctx.clearRect(0,0, hoverground.width, hoverground.height)
     for (let z = 0; z < hovergroundMap.length; z++) {
         hctx.fillStyle = hovergroundMap[z]['color']
-        hctx.fillRect(hovergroundMap[z]['x']*10,hovergroundMap[z]['y']*10,10,10)
+        hctx.fillRect(hovergroundMap[z]['x']*pieceSize,hovergroundMap[z]['y']*pieceSize,pieceSize,pieceSize)
     }
 
     //displaying the entity currently hovering over
@@ -145,4 +145,4 @@ setInterval(() => {
             selectedDisplay.innerHTML = ''
         }
     }
-}, 1000)
+}, 1000/10)

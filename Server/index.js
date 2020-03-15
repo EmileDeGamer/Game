@@ -67,20 +67,20 @@ for (let i = 0; i < mapSizeX; i++) {
     foreground.push(foregroundRow)
 }
 
-for (let i = 0; i < 5000; i++) { //testing amount
+for (let i = 0; i < 2500; i++) { //testing amount
     let energyGenerator = new EnergyGenerator(0, 0, 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100), 0)
-    generateItemOnAvailablePlace(energyGenerator)
+    generateItemOnAvailablePlace(energyGenerator, generators)
 }
 
-function generateItemOnAvailablePlace(entity){
+function generateItemOnAvailablePlace(entity, array){
     if(typeof foreground[entity['x']][entity['y']]['type'] == 'undefined'){
         foreground[entity['x']][entity['y']] = entity
-        generators.push(entity)
+        array.push(entity)
     }
     else{
         entity['x'] = Math.floor(Math.random() * mapSizeX)
         entity['y'] = Math.floor(Math.random() * mapSizeY)
-        generateItemOnAvailablePlace(entity)
+        generateItemOnAvailablePlace(entity, array)
     }
 }
 
@@ -126,17 +126,30 @@ function checkOnDuplicateName(data, attempt){
         bots.push(new Bot(data, spawnX, spawnY, data))
     }
     else{
-        checkOnDuplicateName(data + attempt++, attempt++)
+        data = data.split('')
+        if(attempt == 0){
+            data.push(0)
+        }
+        else{
+            data[data.length - 1]++
+        }
+        let name = ''
+        for (let i = 0; i < data.length; i++) {
+            name+=data[i]
+        }
+        checkOnDuplicateName(name, attempt+=1)
     }
 }
 
 for (let i = 0; i < 250; i++) { //testing amount
-    bots.push(new Bot('test', spawnX, spawnY, 'test'))
+    checkOnDuplicateName('test', 0)
+    //bots.push(new Bot('test', spawnX, spawnY, 'test'))
 }
 
 for (let x = 0; x < bots.length; x++) {
     moveEntityTowardsTarget(bots[x], generators[Math.floor(Math.random() * generators.length)])
 }
+
 //#region pathfinding
 function moveEntityTowardsTarget(bot, target){
     let route = findShortestPath(bot, target)
@@ -167,7 +180,7 @@ function moveEntityTowardsTarget(bot, target){
     }
 }
 
-function translateMapToText(target){
+function translateMapToGrid(target){
     let grid = []
     for (let i = 0; i < background.length; i++) {
         let row = []
@@ -188,7 +201,7 @@ function translateMapToText(target){
 }
 
 function findShortestPath(startEntity, target){
-    let grid = translateMapToText(target)
+    let grid = translateMapToGrid(target)
 
     let location = {
         x: startEntity['x'],
@@ -225,16 +238,16 @@ function retrieveNeighboursFromDirection(currentLocation, direction, grid){
     let y = currentLocation['y']
 
     if(direction == 'east'){
-        x+=1
+        x++
     }
     else if (direction == 'west'){
-        x-=1
+        x--
     }
     else if (direction == 'south'){
-        y+=1
+        y++
     }
     else if (direction == 'north'){
-        y-=1
+        y--
     }
     
     let newLocation = {
@@ -245,7 +258,7 @@ function retrieveNeighboursFromDirection(currentLocation, direction, grid){
     }
     newLocation['status'] = retrieveLocationStatus(newLocation, grid)
 
-    if(newLocation['status'] === 'valid'){
+    if(newLocation['status'] == 'valid'){
         background[newLocation['x']][newLocation['y']]['color'] = 'blue'
         grid[newLocation['x']][newLocation['y']] = 'visited'
     }
@@ -263,7 +276,7 @@ function retrieveLocationStatus(location, grid){
     else if (grid[location['x']][location['y']] == 'goal'){
         return 'goal'
     }
-    else if (grid[location['x']][location['y']] == 'blocked'){
+    else if (grid[location['x']][location['y']] == 'blocked' || grid[location['x']][location['y']] == 'visited'){
         return 'blocked'
     }
 }
