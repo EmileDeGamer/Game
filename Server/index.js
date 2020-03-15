@@ -126,24 +126,19 @@ function checkOnDuplicateName(data, attempt){
         bots.push(new Bot(data, spawnX, spawnY, data))
     }
     else{
-        data = data.split('')
         if(attempt == 0){
-            data.push(0)
+            data = data+0
         }
         else{
-            data[data.length - 1]++
+            data = data.replace(attempt-1, attempt)
         }
-        let name = ''
-        for (let i = 0; i < data.length; i++) {
-            name+=data[i]
-        }
-        checkOnDuplicateName(name, attempt+=1)
+        attempt++
+        checkOnDuplicateName(data, attempt)
     }
 }
 
 for (let i = 0; i < 250; i++) { //testing amount
     checkOnDuplicateName('test', 0)
-    //bots.push(new Bot('test', spawnX, spawnY, 'test'))
 }
 
 for (let x = 0; x < bots.length; x++) {
