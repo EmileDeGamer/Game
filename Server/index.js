@@ -140,8 +140,7 @@ function checkOnDuplicateName(data, attempt){
         else{
             data = data.replace(attempt-1, attempt)
         }*/
-        data+attempt
-        attempt++
+        data+=attempt
         bots.push(new Bot(data, spawnX, spawnY, data))
     //checkOnDuplicateName(data, attempt)
     //}
