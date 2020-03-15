@@ -1,5 +1,5 @@
 module.exports = class Bot {
-    constructor(name, x, y, owner, socket){
+    constructor(name, x, y, owner){
         this.name = name //bots own name
         this.x = x //the current x
         this.y = y //the current y
