@@ -49,7 +49,7 @@ let CustomBot = require("./classes/CustomBot-Henk")
 let EnergyGenerator = require("./classes/EnergyGeneratorBase")
 
 let background = [], foreground = [], bots = [], generators = []
-let spawnX = 49, spawnY = 49
+let spawnX = 50, spawnY = 50
 let maxX = 99
 let maxY = 99
 let mapSizeX = maxX + 1
@@ -68,9 +68,20 @@ for (let i = 0; i < mapSizeX; i++) {
 }
 
 for (let i = 0; i < 5000; i++) { //testing amount
-    let energyGenerator = new EnergyGenerator(Math.floor(Math.random() * maxX), Math.floor(Math.random() * maxY), 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100), 0)
-    generators.push(energyGenerator)
-    foreground[generators[i]['x']][generators[i]['y']] = generators[i]
+    let energyGenerator = new EnergyGenerator(0, 0, 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100), 0)
+    generateItemOnAvailablePlace(energyGenerator)
+}
+
+function generateItemOnAvailablePlace(entity){
+    if(typeof foreground[entity['x']][entity['y']]['type'] == 'undefined'){
+        foreground[entity['x']][entity['y']] = entity
+        generators.push(entity)
+    }
+    else{
+        entity['x'] = Math.floor(Math.random() * mapSizeX)
+        entity['y'] = Math.floor(Math.random() * mapSizeY)
+        generateItemOnAvailablePlace(entity)
+    }
 }
 
 io.on('connection', function(socket){
