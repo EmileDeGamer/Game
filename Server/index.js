@@ -72,7 +72,7 @@ for (let i = 0; i < mapSizeX; i++) {
 console.log("Generating foreground and background took " + (d2.getTime() - d1.getTime()) + " ms")
 console.log("Generating energy generators...")
 d1 = new Date()
-for (let i = 0; i < 1000; i++) { //testing amount
+for (let i = 0; i < 2500; i++) { //testing amount
     let energyGenerator = new EnergyGenerator(0, 0, 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100)+1, 0)
     generateItemOnAvailablePlace(energyGenerator, generators)
 }
@@ -146,7 +146,7 @@ function checkOnDuplicateName(data, attempt){
     //}
 }
 
-for (let i = 0; i < 250; i++) { //testing amount
+for (let i = 0; i < 500; i++) { //testing amount
     checkOnDuplicateName('test', i)
 }    
 
