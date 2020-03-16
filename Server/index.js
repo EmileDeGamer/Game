@@ -191,25 +191,26 @@ function moveEntityTowardsTarget(bot, target){
 
 function checkWhatToDo(bot, target){
     if(target['type'] == 'generator'){
-        obtainEnergy(bot, target)
-    }
-}
-
-function obtainEnergy(bot, target){
-    let generationInterval = 500
-    for (let i = bot['energy']; i < bot['maxEnergy']; i++) {
-        setTimeout(() => {
-            if(target['currentEnergy'] > 1){
-                bot['energy']+=1
-                target['currentEnergy']-=1
-            }
-            else if (target['currentEnergy'] == 1){
-                generationInterval = (generationInterval + target['generationInterval']) * i
-            }
-            if(i == bot['maxEnergy']-1){
+        
+        let obtainEnergyTimer = setInterval(() => {
+            if(bot['energy'] >= bot['maxEnergy']){
                 moveEntityTowardsTarget(bot, {x:spawnX, y:spawnY, type:'spawn'})
+                clearInterval(obtainEnergyTimer)
             }
-        }, generationInterval * i)
+
+            if(target['energy'] > 0){
+                if(target['energy'] > 0){
+                    bot['energy']++
+                    target['energy']--
+                }
+                else if (target['energy'] == 0){
+                    setTimeout(() => {
+                        bot['energy']++
+                        target['energy']--
+                    },target['generationInterval']);
+                }
+            }
+        }, 500)
     }
 }
 
@@ -224,7 +225,7 @@ function translateMapToGrid(target){
     }
     for (let i = 0; i < foreground.length; i++) {
         for (let x = 0; x < foreground[i].length; x++) {
-            if(foreground[i][x]['type'] == 'generator'){// || foreground[i][x]['type'] == 'bot'){
+            if(foreground[i][x]['type'] == 'generator'){
                 grid[i][x] = 'blocked'
             }
         }
