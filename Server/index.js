@@ -73,7 +73,7 @@ console.log("Generating foreground and background took " + (d2.getTime() - d1.ge
 console.log("Generating energy generators...")
 d1 = new Date()
 for (let i = 0; i < 1000; i++) { //testing amount
-    let energyGenerator = new EnergyGenerator(0, 0, 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100), 0)
+    let energyGenerator = new EnergyGenerator(0, 0, 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100)+1, 0)
     generateItemOnAvailablePlace(energyGenerator, generators)
 }
 
