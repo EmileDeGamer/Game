@@ -7,12 +7,13 @@ module.exports = class EnergyGeneratorBase{
         this.color = color
         this.name = name
         this.type = 'generator'
+        this.generationInterval = generationInterval
         let generator = this
 
         for (let i=this.currentEnergy; i<=this.maxEnergy; i++) { 
             setTimeout(function() { 
-                generator.currentEnergy = i
-            }, generationInterval * 1000 * i)
+                generator.currentEnergy++
+            }, this.generationInterval * 1000 * i)
         }
     }
 

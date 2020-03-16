@@ -49,8 +49,8 @@ let CustomBot = require("./classes/CustomBot-Henk")
 let EnergyGenerator = require("./classes/EnergyGeneratorBase")
 
 let background = [], foreground = [], bots = [], generators = []
-let maxX = 199
-let maxY = 199
+let maxX = 99
+let maxY = 99
 let mapSizeX = maxX + 1
 let mapSizeY = maxY + 1
 let spawnX = Math.floor(mapSizeX / 2), spawnY = Math.floor(mapSizeY / 2)
@@ -72,7 +72,7 @@ for (let i = 0; i < mapSizeX; i++) {
 console.log("Generating foreground and background took " + (d2.getTime() - d1.getTime()) + " ms")
 console.log("Generating energy generators...")
 d1 = new Date()
-for (let i = 0; i < 5000; i++) { //testing amount
+for (let i = 0; i < 1000; i++) { //testing amount
     let energyGenerator = new EnergyGenerator(0, 0, 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100), 0)
     generateItemOnAvailablePlace(energyGenerator, generators)
 }
@@ -146,7 +146,7 @@ function checkOnDuplicateName(data, attempt){
     //}
 }
 
-for (let i = 0; i < 500; i++) { //testing amount
+for (let i = 0; i < 250; i++) { //testing amount
     checkOnDuplicateName('test', i)
 }    
 
@@ -161,26 +161,55 @@ function moveEntityTowardsTarget(bot, target){
         //when it can't reach target
     }
     else{
-        for (let i = 0; i < route.length-1; i++) {
+        for (let i = 0; i < route.length; i++) {
             setTimeout(function() { 
-                if(route[i] == 'north'){
-                    bot['y']--
-                    background[bot['x']][bot['y']]['color'] = 'green'
+                if(i != route.length - 1){ 
+                    if(route[i] == 'north'){
+                        bot['y']--
+                        //background[bot['x']][bot['y']]['color'] = 'green'
+                    }
+                    else if (route[i] == 'east'){
+                        bot['x']++
+                        //background[bot['x']][bot['y']]['color'] = 'green'
+                    }
+                    else if (route[i] == 'south'){
+                        bot['y']++
+                        //background[bot['x']][bot['y']]['color'] = 'green'
+                    }
+                    else if (route[i] == 'west'){
+                        bot['x']--
+                        //background[bot['x']][bot['y']]['color'] = 'green'
+                    }
                 }
-                else if (route[i] == 'east'){
-                    bot['x']++
-                    background[bot['x']][bot['y']]['color'] = 'green'
-                }
-                else if (route[i] == 'south'){
-                    bot['y']++
-                    background[bot['x']][bot['y']]['color'] = 'green'
-                }
-                else if (route[i] == 'west'){
-                    bot['x']--
-                    background[bot['x']][bot['y']]['color'] = 'green'
+                else{
+                    checkWhatToDo(bot, target)
                 }
             }, 100 * i) 
         }
+    }
+}
+
+function checkWhatToDo(bot, target){
+    if(target['type'] == 'generator'){
+        obtainEnergy(bot, target)
+    }
+}
+
+function obtainEnergy(bot, target){
+    let generationInterval = 500
+    for (let i = bot['energy']; i < bot['maxEnergy']; i++) {
+        setTimeout(() => {
+            if(target['currentEnergy'] > 1){
+                bot['energy']+=1
+                target['currentEnergy']-=1
+            }
+            else if (target['currentEnergy'] == 1){
+                generationInterval = (generationInterval + target['generationInterval']) * i
+            }
+            if(i == bot['maxEnergy']-1){
+                moveEntityTowardsTarget(bot, {x:spawnX, y:spawnY, type:'spawn'})
+            }
+        }, generationInterval * i)
     }
 }
 
@@ -195,7 +224,7 @@ function translateMapToGrid(target){
     }
     for (let i = 0; i < foreground.length; i++) {
         for (let x = 0; x < foreground[i].length; x++) {
-            if(foreground[i][x]['type'] == 'generator' || foreground[i][x]['type'] == 'bot'){
+            if(foreground[i][x]['type'] == 'generator'){// || foreground[i][x]['type'] == 'bot'){
                 grid[i][x] = 'blocked'
             }
         }
