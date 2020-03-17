@@ -44,11 +44,12 @@ http.listen(process.env.PORT, function(){
 
 //#endregion
 
-//classes
+//#region classes
 let Bot = require("./classes/BotBase")
 let EnergyGenerator = require("./classes/EnergyGeneratorBase")
+//#endregion
 
-//game vars
+//#region game vars
 let background = [], foreground = [], bots = [], generators = []
 let maxX = 99
 let maxY = 99
@@ -56,7 +57,9 @@ let mapSizeX = maxX + 1
 let mapSizeY = maxY + 1
 let spawnX = Math.floor(mapSizeX / 2), spawnY = Math.floor(mapSizeY / 2)
 let pieceSize = 10 //in pixels
+//#endregion
 
+//#region generate game entities
 let d1 = new Date()
 let d2 = new Date()
 console.log("Generating foreground and background...")
@@ -92,43 +95,7 @@ function generateItemOnAvailablePlace(entity, array){
 d2 = new Date()
 console.log("Generating energy generators took " + (d2.getTime() - d1.getTime()) + " ms")
 
-//realtime updates
-io.on('connection', function(socket){
-    console.log('connection made!')  
-    socket.emit('createMap', {maxX: maxX, maxY: maxY, pieceSize: pieceSize})
-    //#region disconnecting for testing, later bots when they die they will be removed from array
-    socket.on('disconnect', function(){
-        console.log('disconnected! :(')
-        /*if(bots.map(function(e) { return e.socket; }).indexOf(socket) !== -1){
-            bots.splice(bots.map(function(e) { return e.socket; }).indexOf(socket), 1)
-        }*/
-    })
-    //#endregion
 
-    //#region update maps
-    setInterval(() => {
-        socket.emit('updateMap', {map:background, name:'background'})
-    }, 1000/10)
-
-    setInterval(() => {
-        foreground = []
-        for (let i = 0; i < mapSizeX; i++) {
-            let foregroundRow = []
-            for (let x = 0; x < mapSizeY; x++) {
-                foregroundRow.push({})
-            }
-            foreground.push(foregroundRow)
-        }
-        for (let i = 0; i < generators.length; i++) {
-            foreground[generators[i]['x']][generators[i]['y']] = generators[i]
-        }
-        for (let x = 0; x < bots.length; x++) {
-            foreground[bots[x]['x']][bots[x]['y']] = bots[x]
-        }
-        io.emit('updateMap', {map:foreground, name:'foreground'})
-    }, 1000/10)
-    //#endregion
-})
 console.log("Creating bots...")
 d1 = new Date()
 function checkOnDuplicateName(data, attempt){
@@ -155,6 +122,7 @@ for (let i = 0; i < 500; i++) { //testing amount
 for (let x = 0; x < bots.length; x++) {
     moveEntityTowardsTarget(bots[x], generators[Math.floor(Math.random() * generators.length)])
 }
+//#endregion
 
 //#region pathfinding
 function moveEntityTowardsTarget(bot, target){
@@ -321,3 +289,42 @@ function retrieveLocationStatus(location, grid){
 
 d2 = new Date()
 console.log("Generating bots and finding their shortest path took " + (d2.getTime() - d1.getTime()) + " ms")
+
+//#region realtime updates
+io.on('connection', function(socket){
+    console.log('connection made!')  
+    socket.emit('createMap', {maxX: maxX, maxY: maxY, pieceSize: pieceSize})
+    //#region disconnecting for testing, later bots when they die they will be removed from array
+    socket.on('disconnect', function(){
+        console.log('disconnected! :(')
+        /*if(bots.map(function(e) { return e.socket; }).indexOf(socket) !== -1){
+            bots.splice(bots.map(function(e) { return e.socket; }).indexOf(socket), 1)
+        }*/
+    })
+    //#endregion
+
+    //#region update maps
+    setInterval(() => {
+        socket.emit('updateMap', {map:background, name:'background'})
+    }, 1000/10)
+
+    setInterval(() => {
+        foreground = []
+        for (let i = 0; i < mapSizeX; i++) {
+            let foregroundRow = []
+            for (let x = 0; x < mapSizeY; x++) {
+                foregroundRow.push({})
+            }
+            foreground.push(foregroundRow)
+        }
+        for (let i = 0; i < generators.length; i++) {
+            foreground[generators[i]['x']][generators[i]['y']] = generators[i]
+        }
+        for (let x = 0; x < bots.length; x++) {
+            foreground[bots[x]['x']][bots[x]['y']] = bots[x]
+        }
+        io.emit('updateMap', {map:foreground, name:'foreground'})
+    }, 1000/10)
+    //#endregion
+})
+//#endregion
