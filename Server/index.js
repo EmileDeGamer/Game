@@ -191,9 +191,9 @@ function moveEntityTowardsTarget(bot, target){
 
 function checkWhatToDo(bot, target){
     if(target['type'] == 'generator'){
-        
         let obtainEnergyTimer = setInterval(() => {
             if(bot['energy'] >= bot['maxEnergy']){
+                bot['energy'] = bot['maxEnergy']
                 moveEntityTowardsTarget(bot, {x:spawnX, y:spawnY, type:'spawn'})
                 clearInterval(obtainEnergyTimer)
             }
