@@ -285,10 +285,10 @@ function retrieveLocationStatus(location, grid){
         return 'blocked'
     }
 }
-//#endregion
 
 d2 = new Date()
 console.log("Generating bots and finding their shortest path took " + (d2.getTime() - d1.getTime()) + " ms")
+//#endregion
 
 //#region realtime updates
 io.on('connection', function(socket){
