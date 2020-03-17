@@ -29,6 +29,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static('public'))
 
+//routes
 app.get('/', function(req, res){
     res.sendFile('./public/index.html')
 })
@@ -43,11 +44,11 @@ http.listen(process.env.PORT, function(){
 
 //#endregion
 
+//classes
 let Bot = require("./classes/BotBase")
-let CustomBot = require("./classes/CustomBot-Henk")
-
 let EnergyGenerator = require("./classes/EnergyGeneratorBase")
 
+//game vars
 let background = [], foreground = [], bots = [], generators = []
 let maxX = 99
 let maxY = 99
@@ -91,6 +92,7 @@ function generateItemOnAvailablePlace(entity, array){
 d2 = new Date()
 console.log("Generating energy generators took " + (d2.getTime() - d1.getTime()) + " ms")
 
+//realtime updates
 io.on('connection', function(socket){
     console.log('connection made!')  
     socket.emit('createMap', {maxX: maxX, maxY: maxY, pieceSize: pieceSize})
@@ -159,6 +161,7 @@ function moveEntityTowardsTarget(bot, target){
     let route = findShortestPath(bot, target)
     if(!route){
         //when it can't reach target
+        console.log('unreachable target')
     }
     else{
         for (let i = 0; i < route.length; i++) {
