@@ -8,8 +8,9 @@ let bodyParser = require('body-parser')
 let mysql = require('mysql')
 require('dotenv').config()
 let io = require('socket.io')(http)
-let path = require('path')
+let bcrypt = require('bcryptjs')
 
+//#region database functions
 let con = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USERNAME,
@@ -25,6 +26,103 @@ con.connect(function(err) {
     else console.log('connected to DB!')
 })
 
+function createInsertString(table, valuesObject = {}){
+    let insertString = ''
+    let valuesString = ''
+    let index = 0
+    for (const [key, value] of Object.entries(valuesObject)) {
+        if(index == 0){
+            insertString += key
+            valuesString += "'" + value + "'"
+        }
+        else{
+            insertString += ", " + key
+            valuesString += ",'" + value + "'"
+        }
+        index++
+    }
+    return "INSERT INTO " + table + " (" + insertString + ") VALUES (" + valuesString + ")"
+}
+
+function createGetDataString(table, whereObject = {}){
+    let whereString = ''
+    let index = 0
+    for (const [key, value] of Object.entries(whereObject)) {
+        if(index == 0){
+            whereString += key + " = '" + value + "'"
+        }
+        else{
+            whereString += " AND " + key + " = '" + value + "'"
+        }
+        index++
+    }
+    return "SELECT * FROM " + table + " WHERE " + whereString
+}
+
+function deleteData(table, whereObject = {}){
+    let whereString = ''
+    let index = 0
+    for (const [key, value] of Object.entries(whereObject)) {
+        if(index == 0){
+            whereString += key + " = '" + value + "'"
+        }
+        else{
+            whereString += " AND " + key + " = '" + value + "'"
+        }
+        index++
+    }
+    con.query("DELETE FROM " + table + " WHERE " + whereString, function(err, result){
+        if(err){
+            console.log(err)
+        }
+        else{
+
+        }
+    })
+}
+
+function updateData(table, whatToUpdateObject = {}, whereObject = {}){
+    let whereString = ''
+    let index = 0
+    for (const [key, value] of Object.entries(whereObject)) {
+        if(index == 0){
+            whereString += key + " = '" + value + "'"
+        }
+        else{
+            whereString += " AND " + key + " = '" + value + "'"
+        }
+        index++
+    }
+    let updateString = ''
+    index = 0
+    for (const [key, value] of Object.entries(whatToUpdateObject)) {
+        if(index == 0){
+            updateString += key + " = '" + value + "'"
+        }
+        else{
+            updateString += " AND " + key + " = '" + value + "'"
+        }
+        index++
+    }
+    con.query("UPDATE " + table + " SET " + updateString + " WHERE " + whereString, function(err, result){
+        if(err){
+            console.log(err)
+        }
+        else{
+
+        }
+    })
+}
+
+//#endregion
+
+//#region regexes
+let nameRegex = /^[a-zA-Z -]{3,255}$/
+let usernameRegex = /^[a-zA-Z0-9_-]{3,15}$/
+let emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/
+let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/
+//#endregion
+
 app.set('view engine', 'pug')
 app.set('views','./views')
 app.use(bodyParser.json())
@@ -34,11 +132,11 @@ app.use(express.static('public'))
 //#region routes
 //#region pages
 app.get('/', function(req, res){
-    res.sendFile('./views/index.pug')
+    res.render('index')
 })
 
 app.get('/game', function(req, res){
-    res.sendFile('./views/index.pug')
+    res.render('index')
 })
 
 app.get('/login', function(req, res){
@@ -56,13 +154,86 @@ app.get('*', function(req, res){
 
 //#region posts
 app.post('/login', function(req, res){
+    let errors = []
     let userInput = {username: req.body.username}
-    console.log(userInput)
+    if(req.body.username === ""){
+        errors.push("Username can't be empty")
+    }
+    if(req.body.password === ""){
+        errors.push("Password can't be empty")
+    }
+    if(errors.length == 0){
+        let query = createGetDataString("users", {username:req.body.username})
+        con.query(query, function(err, result){
+            if(err){
+                errors.push("user doesn't exist")
+                //return errors and input
+            }
+            else{
+                let data = result[0]
+                if(bcrypt.compareSync(req.body.password, data['password'])){
+                    //save session and redirect to game
+                    res.redirect('/')
+                }
+                else{
+                    errors.push('wrong password, try again')
+                    //return errors and input
+                }
+            }
+        })
+    }
+    else{
+        //return the errors to the view
+    }
 })
 
 app.post('/register', function(req, res){
     let userInput = {name: req.body.name, username: req.body.username, email: req.body.email}
+    let errors = []
     console.log(userInput)
+    if(req.body.name === ""){
+        errors.push("Name can't be empty")
+    }
+    if(req.body.username === ""){
+        errors.push("Username can't be empty")
+    }
+    if(req.body.email === ""){
+        errors.push("Email can't be empty")
+    }
+    if(req.body.password === ""){
+        errors.push("Password can't be empty")
+    }
+    if(!req.body.password.match(req.body.repeatPassword)){
+        errors.push("Passwords are not the same")
+    }
+    if(!req.body.name.match(nameRegex)){
+        errors.push("Name cannot have numbers")
+    }
+    if(!req.body.username.match(usernameRegex)){
+        errors.push("Username cannot have spaces and min length: 3, max length: 15")
+    }
+    if(!req.body.email.match(emailRegex)){
+        errors.push("Email cannot have spaces")
+    }
+    if(!req.body.password.match(passwordRegex)){
+        errors.push("Password must have 8 characters, 1 lower case, 1 upper case, 1 number")
+    }
+    if(errors.length === 0){
+        let hash = bcrypt.hashSync(req.body.password, 8)
+        let query = createInsertString('users', {name:req.body.name, username:req.body.username, email:req.body.email, password:hash})
+        con.query(query, function(err, result){
+            if(err){
+                errors.push("Username already in use")
+                //return the errors to the view
+            }
+            else{
+                res.redirect('/')
+            }
+        })
+    }
+    else{
+        //return the errors to the view
+    }
 })
 //#endregion
 
