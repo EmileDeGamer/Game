@@ -217,7 +217,6 @@ app.post('/login', function(req, res){
 app.post('/register', function(req, res){
     let userInput = {name: req.body.name, username: req.body.username, email: req.body.email}
     let errors = []
-    console.log(userInput)
     if(req.body.name === ""){
         errors.push("Name can't be empty")
     }

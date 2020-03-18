@@ -1,7 +1,7 @@
 include ./layout/header.pug
 script(src="js/main.js", defer)
 div(class="content")
-    if errors !== "undefined"
+    if errors !== undefined
         ul
             each val in errors
                 li= val
