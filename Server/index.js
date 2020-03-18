@@ -8,6 +8,7 @@ let bodyParser = require('body-parser')
 let mysql = require('mysql')
 require('dotenv').config()
 let io = require('socket.io')(http)
+let path = require('path')
 
 let con = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -24,23 +25,51 @@ con.connect(function(err) {
     else console.log('connected to DB!')
 })
 
+app.set('view engine', 'pug')
 app.set('views','./views')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static('public'))
 
-//routes
+//#region routes
+//#region pages
 app.get('/', function(req, res){
-    res.sendFile('./public/index.html')
+    res.sendFile('./views/index.pug')
+})
+
+app.get('/game', function(req, res){
+    res.sendFile('./views/index.pug')
+})
+
+app.get('/login', function(req, res){
+    res.render('login')
+})
+
+app.get('/register', function(req, res){
+    res.render('register')
 })
 
 app.get('*', function(req, res){
     res.send('Sorry, this is an invalid URL.')
 })
+//#endregion
+
+//#region posts
+app.post('/login', function(req, res){
+    let userInput = {username: req.body.username}
+    console.log(userInput)
+})
+
+app.post('/register', function(req, res){
+    let userInput = {name: req.body.name, username: req.body.username, email: req.body.email}
+    console.log(userInput)
+})
+//#endregion
 
 http.listen(process.env.PORT, function(){
     console.log("listening on " + process.env.PORT)
 })
+//#endregion
 
 //#endregion
 

@@ -1,0 +1,24 @@
+include ./layout/header.pug
+script(src="js/main.js", defer)
+div(class="content")
+    form(action="register" method="post")
+        div(class="formContent")
+            label(for="name") Name: 
+            input(type="text" name="name" required)
+        div(class="formContent")
+            label(for="username") Username: 
+            input(type="text" name="username" required)
+        div(class="formContent")
+            label(for="email") Email: 
+            input(type="text" name="email" required)
+        div(class="formContent")
+            label(for="password") Password: 
+            input(type="password" name="password", required, id="password")
+            input(type="checkbox" name="passwordCheckbox" id="showPassword")
+        div(class="formContent")
+            label(for="repeatPassword") Repeat Password:
+            input(type="password" name="password", required, id="repeatPassword")
+            input(type="checkbox" name="passwordCheckbox" id="showRepeatPassword")
+        div(class="formContent")
+            button(type="submit") Register
+include ./layout/footer.pug

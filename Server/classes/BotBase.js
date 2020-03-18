@@ -1,5 +1,5 @@
 module.exports = class Bot {
-    constructor(name, x, y, owner){
+    constructor(name, x, y, owner, map){
         this.name = name //bots own name
         this.x = x //the current x
         this.y = y //the current y
@@ -8,13 +8,6 @@ module.exports = class Bot {
         this.color = 'black'
         this.energy = 0
         this.maxEnergy = 10
+        this.map = map
     }    
-
-    /*moveTowardsEntity(entity){
-        console.log(entity)
-    }*/
-
-    moveTowardsCoord(x, y){
-        console.log('?')
-    }
 }

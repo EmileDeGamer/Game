@@ -1,0 +1,14 @@
+include ./layout/header.pug
+script(src="js/main.js", defer)
+div(class="content")
+    form(action="login" method="post")
+        div(class="formContent")
+            label(for="username") Username: 
+            input(type="text" name="username" required)
+        div(class="formContent")
+            label(for="password") Password: 
+            input(type="password" name="password", required, id="password")
+            input(type="checkbox" name="passwordCheckbox" id="showPassword")
+        div(class="formContent")
+            button(type="submit") Login
+include ./layout/footer.pug

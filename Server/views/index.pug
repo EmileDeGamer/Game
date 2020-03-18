@@ -1,0 +1,12 @@
+include ./layout/header.pug
+script(src="socket.io/socket.io.js", defer)
+script(src="js/script.js", defer)
+div(class="content")
+    div(id="game", style="position: relative;")
+        canvas(id="background", style="position: absolute; z-index: 0;")
+        canvas(id="foreground", style="position: absolute; z-index: 1;")
+        canvas(id="hoverground", style="position: absolute; z-index: 2;")
+    div(id="selectedDisplay")
+    div(id="hoverDisplay")
+    div(id="hoveredEntityDisplay")
+include ./layout/footer.pug
