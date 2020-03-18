@@ -9,6 +9,7 @@ let mysql = require('mysql')
 require('dotenv').config()
 let io = require('socket.io')(http)
 let bcrypt = require('bcryptjs')
+let session = require('express-session')
 
 //#region database functions
 let con = mysql.createConnection({
@@ -127,24 +128,45 @@ app.set('view engine', 'pug')
 app.set('views','./views')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(session({secret: "*&*&*&*&*&*", saveUninitialized: false, resave: false}))
 app.use(express.static('public'))
 
 //#region routes
 //#region pages
 app.get('/', function(req, res){
-    res.render('index')
+    if(req.session.user != null){
+        res.render('index')
+    }
+    else{
+        res.redirect('/login')
+    }
 })
 
 app.get('/game', function(req, res){
-    res.render('index')
+    if(req.session.user != null){
+        res.redirect('/')
+    }
+    else{
+        res.redirect('/login')
+    }
 })
 
 app.get('/login', function(req, res){
-    res.render('login')
+    if(req.session.user != null){
+        res.redirect('/')
+    }
+    else{
+        res.render('login')
+    }
 })
 
 app.get('/register', function(req, res){
-    res.render('register')
+    if(req.session.user != null){
+        res.redirect('/')
+    }
+    else{
+        res.render('register')
+    }
 })
 
 app.get('*', function(req, res){
@@ -172,7 +194,7 @@ app.post('/login', function(req, res){
             else{
                 let data = result[0]
                 if(bcrypt.compareSync(req.body.password, data['password'])){
-                    //save session and redirect to game
+                    req.session.user = userInput
                     res.redirect('/')
                 }
                 else{
@@ -227,6 +249,7 @@ app.post('/register', function(req, res){
                 //return the errors to the view
             }
             else{
+                req.session.user = userInput
                 res.redirect('/')
             }
         })
