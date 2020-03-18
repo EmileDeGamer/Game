@@ -1,6 +1,10 @@
 include ./layout/header.pug
 script(src="js/main.js", defer)
 div(class="content")
+    if errors !== "undefined"
+        ul
+            each val in errors
+                li= val
     form(action="login" method="post")
         div(class="formContent")
             label(for="username") Username: 

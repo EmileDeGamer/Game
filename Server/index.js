@@ -188,24 +188,29 @@ app.post('/login', function(req, res){
         let query = createGetDataString("users", {username:req.body.username})
         con.query(query, function(err, result){
             if(err){
-                errors.push("user doesn't exist")
-                //return errors and input
+                
             }
             else{
-                let data = result[0]
-                if(bcrypt.compareSync(req.body.password, data['password'])){
-                    req.session.user = userInput
-                    res.redirect('/')
+                if(result.length == 0){
+                    errors.push("user doesn't exist")
+                    res.render("login", {errors: errors, input: userInput})
                 }
                 else{
-                    errors.push('wrong password, try again')
-                    //return errors and input
+                    let data = result[0]
+                    if(bcrypt.compareSync(req.body.password, data['password'])){
+                        req.session.user = userInput
+                        res.redirect('/')
+                    }
+                    else{
+                        errors.push('wrong password, try again')
+                        res.render("login", {errors: errors, input: userInput})
+                    }
                 }
             }
         })
     }
     else{
-        //return the errors to the view
+        res.render("login", {errors: errors, input: userInput})
     }
 })
 
@@ -246,7 +251,7 @@ app.post('/register', function(req, res){
         con.query(query, function(err, result){
             if(err){
                 errors.push("Username already in use")
-                //return the errors to the view
+                res.render("register", {errors: errors, input: userInput})
             }
             else{
                 req.session.user = userInput
@@ -255,7 +260,7 @@ app.post('/register', function(req, res){
         })
     }
     else{
-        //return the errors to the view
+        res.render("register", {errors: errors, input: userInput})
     }
 })
 //#endregion
