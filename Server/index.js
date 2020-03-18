@@ -1,6 +1,4 @@
-//needs to send the real time view to the client
-//initializing things i need
-//#region 
+//#region base
 let express = require("express")
 let app = express()
 let http = require('http').createServer(app)
@@ -10,6 +8,7 @@ require('dotenv').config()
 let io = require('socket.io')(http)
 let bcrypt = require('bcryptjs')
 let session = require('express-session')
+let fs = require('fs')
 
 //#region database functions
 let con = mysql.createConnection({
@@ -271,11 +270,6 @@ http.listen(process.env.PORT, function(){
 
 //#endregion
 
-//#region classes
-let Bot = require("./classes/BotBase")
-let EnergyGenerator = require("./classes/EnergyGeneratorBase")
-//#endregion
-
 //#region game vars
 let background = [], foreground = [], bots = [], generators = []
 let maxX = 99
@@ -284,6 +278,29 @@ let mapSizeX = maxX + 1
 let mapSizeY = maxY + 1
 let spawnX = Math.floor(mapSizeX / 2), spawnY = Math.floor(mapSizeY / 2)
 let pieceSize = 10 //in pixels
+//#endregion
+
+//#region classes
+let Bot = require("./classes/BotBase")
+let EnergyGenerator = require("./classes/EnergyGeneratorBase")
+
+let users = fs.readdirSync('./classes/bots/')
+let botClasses = []
+for (let i = 0; i < users.length; i++) {
+    let userBotFolder = fs.readdirSync('./classes/bots/' + users[i])
+    for (let x = 0; x < userBotFolder.length; x++) {
+        if(userBotFolder[x] == 'main.js'){
+            botClasses.push('./classes/bots/' + users[i] + '/' + userBotFolder[x])
+        }
+    }
+}
+
+for (let i = 0; i < botClasses.length; i++) {
+    botClasses[i] = require(botClasses[i])
+    let bot = new botClasses[i]
+    bot.x = spawnX
+    bot.y = spawnY
+}
 //#endregion
 
 //#region generate game entities

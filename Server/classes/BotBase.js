@@ -9,5 +9,6 @@ module.exports = class Bot {
         this.energy = 0
         this.maxEnergy = 10
         this.map = map
+        this.queue = [] //the queue for all the given commands
     }    
 }
