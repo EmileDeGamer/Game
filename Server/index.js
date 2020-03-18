@@ -187,7 +187,7 @@ app.post('/login', function(req, res){
         let query = createGetDataString("users", {username:req.body.username})
         con.query(query, function(err, result){
             if(err){
-                
+                console.log(err)
             }
             else{
                 if(result.length == 0){
@@ -281,7 +281,7 @@ let pieceSize = 10 //in pixels
 //#endregion
 
 //#region classes
-let Bot = require("./classes/BotBase")
+//let Bot = require("./classes/BotBase")
 let EnergyGenerator = require("./classes/EnergyGeneratorBase")
 
 let users = fs.readdirSync('./classes/bots/')
@@ -300,6 +300,8 @@ for (let i = 0; i < botClasses.length; i++) {
     let bot = new botClasses[i]
     bot.x = spawnX
     bot.y = spawnY
+    bot.map = background
+    bots.push(bot)
 }
 //#endregion
 
@@ -342,26 +344,26 @@ console.log("Generating energy generators took " + (d2.getTime() - d1.getTime())
 
 console.log("Creating bots...")
 d1 = new Date()
-function checkOnDuplicateName(data, attempt){
+/*function checkOnDuplicateName(data, attempt){
     /*if(bots.map(function(e) { return e.name; }).indexOf(data) == -1){
         bots.push(new Bot(data, spawnX, spawnY, data))
     }
-    else{*/
+    else{
         /*if(attempt == 0){
             data = data+0
         }
         else{
             data = data.replace(attempt-1, attempt)
-        }*/
+        }
         data+=attempt
         bots.push(new Bot(data, spawnX, spawnY, data))
     //checkOnDuplicateName(data, attempt)
     //}
 }
 
-for (let i = 0; i < 500; i++) { //testing amount
+/*for (let i = 0; i < 500; i++) { //testing amount
     checkOnDuplicateName('test', i)
-}    
+} */   
 
 for (let x = 0; x < bots.length; x++) {
     moveEntityTowardsTarget(bots[x], generators[Math.floor(Math.random() * generators.length)])
