@@ -8,20 +8,29 @@ div(class="content")
     form(action="register" method="post")
         div(class="formContent")
             label(for="name") Name: 
-            input(type="text" name="name" required)
+            if input !== undefined && input.name !== undefined
+                input(type="text" name="name" required value=input.name)
+            else
+                input(type="text" name="name" required)
         div(class="formContent")
             label(for="username") Username: 
-            input(type="text" name="username" required)
+            if input !== undefined && input.username !== undefined
+                input(type="text" name="username" required value=input.username)
+            else
+                input(type="text" name="username" required)
         div(class="formContent")
             label(for="email") Email: 
-            input(type="text" name="email" required)
+            if input !== undefined && input.email !== undefined
+                input(type="text" name="email" required value=input.email)
+            else
+                input(type="text" name="email" required)
         div(class="formContent")
             label(for="password") Password: 
-            input(type="password" name="password", required, id="password")
+            input(type="password" name="password" required)
             input(type="checkbox" name="passwordCheckbox" id="showPassword")
         div(class="formContent")
             label(for="repeatPassword") Repeat Password:
-            input(type="password" name="repeatPassword", required, id="repeatPassword")
+            input(type="password" name="repeatPassword" required)
             input(type="checkbox" name="passwordCheckbox" id="showRepeatPassword")
         div(class="formContent")
             button(type="submit") Register

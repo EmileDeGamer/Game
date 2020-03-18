@@ -8,7 +8,10 @@ div(class="content")
     form(action="login" method="post")
         div(class="formContent")
             label(for="username") Username: 
-            input(type="text" name="username" required)
+            if input !== undefined && input.username !== undefined
+                input(type="text" name="username" required value=input.username)
+            else
+                input(type="text" name="username" required)
         div(class="formContent")
             label(for="password") Password: 
             input(type="password" name="password", required, id="password")
