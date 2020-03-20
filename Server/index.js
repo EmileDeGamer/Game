@@ -379,12 +379,12 @@ d1 = new Date()
 } */   
 
 for (let x = 0; x < bots.length; x++) {
-    moveEntityTowardsTarget(bots[x], generators[Math.floor(Math.random() * generators.length)], foreground)
+    moveEntityTowardsTarget(bots[x], generators[Math.floor(Math.random() * generators.length)], foreground, false)
 }
 //#endregion
 
 //#region pathfinding
-function moveEntityTowardsTarget(bot, target, map){
+function moveEntityTowardsTarget(bot, target, map, moveOnTheTarget){
     let route = findShortestPath(bot, target, map)
     if(!route){
         //when it can't reach target
@@ -393,29 +393,41 @@ function moveEntityTowardsTarget(bot, target, map){
     else{
         for (let i = 0; i < route.length; i++) {
             setTimeout(function() { 
-                if(i != route.length - 1){ 
-                    if(route[i] == 'up'){
-                        bot['y']--
-                        background[bot['x']][bot['y']]['color'] = 'green'
-                    }
-                    else if (route[i] == 'right'){
-                        bot['x']++
-                        background[bot['x']][bot['y']]['color'] = 'green'
-                    }
-                    else if (route[i] == 'down'){
-                        bot['y']++
-                        background[bot['x']][bot['y']]['color'] = 'green'
-                    }
-                    else if (route[i] == 'left'){
-                        bot['x']--
-                        background[bot['x']][bot['y']]['color'] = 'green'
+                if(moveOnTheTarget){
+                    movementController(bot, route, i)
+                    if(i == route.length - 1){
+                        checkWhatToDo(bot, target)
                     }
                 }
                 else{
-                    checkWhatToDo(bot, target)
+                    if(i != route.length - 1){ 
+                        movementController(bot, route, i)
+                    }
+                    else{
+                        checkWhatToDo(bot, target)
+                    }
                 }
             }, 100 * i) 
         }
+    }
+}
+
+function movementController(bot, route, i){
+    if(route[i] == 'up'){
+        bot['y']--
+        background[bot['x']][bot['y']]['color'] = 'green'
+    }
+    else if (route[i] == 'right'){
+        bot['x']++
+        background[bot['x']][bot['y']]['color'] = 'green'
+    }
+    else if (route[i] == 'down'){
+        bot['y']++
+        background[bot['x']][bot['y']]['color'] = 'green'
+    }
+    else if (route[i] == 'left'){
+        bot['x']--
+        background[bot['x']][bot['y']]['color'] = 'green'
     }
 }
 
@@ -424,7 +436,7 @@ function checkWhatToDo(bot, target){
         let obtainEnergyTimer = setInterval(() => {
             if(bot['energy'] >= bot['maxEnergy']){
                 bot['energy'] = bot['maxEnergy']
-                moveEntityTowardsTarget(bot, {x:spawnX, y:spawnY, type:'spawn'}, foreground)
+                moveEntityTowardsTarget(bot, {x:spawnX, y:spawnY, type:'spawn'}, foreground, true)
                 clearInterval(obtainEnergyTimer)
             }
 
@@ -474,7 +486,6 @@ function calculateManhattanDistance(a, b){
 function findShortestPath(bot, target, map){
     let grid = mapToGridWithManhattanDistances(target, map)
     bot['path'] = []
-    bot['type'] = grid[bot['x']][bot['y']]['type']
     let queue = [bot]
     while(queue.length > 0){
         let lowestIndex = 0

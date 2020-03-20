@@ -86,7 +86,9 @@ hoverground.onmousedown = function (e) {
         selectedDisplay.innerHTML = ''
     }
     else{
-        selectedDisplay.innerHTML = JSON.stringify(foregroundMap[roundedX][roundedY])
+        let dataToDisplay = foregroundMap[roundedX][roundedY]
+        dataToDisplay['map'] = undefined
+        selectedDisplay.innerHTML = JSON.stringify(dataToDisplay)
     }
 }
 
@@ -132,13 +134,15 @@ setInterval(() => {
             for (let i = 0; i < foregroundMap.length; i++) {
                 for (let x = 0; x < foregroundMap[i].length; x++) {
                     if(foregroundMap[i][x]['name'] == object['name']){
-                        selectedDisplay.innerHTML = JSON.stringify(foregroundMap[i][x])
+                        let dataToDisplay = foregroundMap[object['x']][object['y']]
+                        dataToDisplay['map'] = undefined
+                        selectedDisplay.innerHTML = JSON.stringify(dataToDisplay)
                         break
                     }
                 }
             }
         }
-        else if(object['type'] != 'bot' && typeof object['type'] != 'undefined'){
+        else if(object['type'] != 'bot'){
             selectedDisplay.innerHTML = JSON.stringify(foregroundMap[object['x']][object['y']])
         }
         else{
