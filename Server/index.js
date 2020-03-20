@@ -294,15 +294,6 @@ for (let i = 0; i < users.length; i++) {
         }
     }
 }
-
-for (let i = 0; i < botClasses.length; i++) {
-    botClasses[i] = require(botClasses[i])
-    let bot = new botClasses[i]
-    bot.x = spawnX
-    bot.y = spawnY
-    bot.map = background
-    bots.push(bot)
-}
 //#endregion
 
 //#region generate game entities
@@ -319,6 +310,18 @@ for (let i = 0; i < mapSizeX; i++) {
     background.push(backgroundRow)
     foreground.push(foregroundRow)
 }
+
+for (let i = 0; i < botClasses.length; i++) {
+    botClasses[i] = require(botClasses[i])
+    let bot = new botClasses[i]
+    bot['x'] = spawnX
+    bot['y'] = spawnY
+    bot['map'] = background
+    bot['type'] = 'bot'
+    bots.push(bot)
+    foreground[bot['x']][bot['y']] = bot
+}
+
 console.log("Generating foreground and background took " + (d2.getTime() - d1.getTime()) + " ms")
 console.log("Generating energy generators...")
 d1 = new Date()
@@ -366,13 +369,13 @@ d1 = new Date()
 } */   
 
 for (let x = 0; x < bots.length; x++) {
-    moveEntityTowardsTarget(bots[x], generators[Math.floor(Math.random() * generators.length)])
+    moveEntityTowardsTarget(bots[x], generators[Math.floor(Math.random() * generators.length)], foreground)
 }
 //#endregion
 
 //#region pathfinding
-function moveEntityTowardsTarget(bot, target){
-    let route = findShortestPath(bot, target)
+function moveEntityTowardsTarget(bot, target, map){
+    let route = findShortestPath(bot, target, map)
     if(!route){
         //when it can't reach target
         console.log('unreachable target')
@@ -381,21 +384,21 @@ function moveEntityTowardsTarget(bot, target){
         for (let i = 0; i < route.length; i++) {
             setTimeout(function() { 
                 if(i != route.length - 1){ 
-                    if(route[i] == 'north'){
+                    if(route[i] == 'up'){
                         bot['y']--
-                        //background[bot['x']][bot['y']]['color'] = 'green'
+                        background[bot['x']][bot['y']]['color'] = 'green'
                     }
-                    else if (route[i] == 'east'){
+                    else if (route[i] == 'right'){
                         bot['x']++
-                        //background[bot['x']][bot['y']]['color'] = 'green'
+                        background[bot['x']][bot['y']]['color'] = 'green'
                     }
-                    else if (route[i] == 'south'){
+                    else if (route[i] == 'down'){
                         bot['y']++
-                        //background[bot['x']][bot['y']]['color'] = 'green'
+                        background[bot['x']][bot['y']]['color'] = 'green'
                     }
-                    else if (route[i] == 'west'){
+                    else if (route[i] == 'left'){
                         bot['x']--
-                        //background[bot['x']][bot['y']]['color'] = 'green'
+                        background[bot['x']][bot['y']]['color'] = 'green'
                     }
                 }
                 else{
@@ -411,7 +414,7 @@ function checkWhatToDo(bot, target){
         let obtainEnergyTimer = setInterval(() => {
             if(bot['energy'] >= bot['maxEnergy']){
                 bot['energy'] = bot['maxEnergy']
-                moveEntityTowardsTarget(bot, {x:spawnX, y:spawnY, type:'spawn'})
+                moveEntityTowardsTarget(bot, {x:spawnX, y:spawnY, type:'spawn'}, foreground)
                 clearInterval(obtainEnergyTimer)
             }
 
@@ -431,54 +434,61 @@ function checkWhatToDo(bot, target){
     }
 }
 
-function translateMapToGrid(target){
+function mapToGridWithManhattanDistances(target, map){
     let grid = []
-    for (let i = 0; i < background.length; i++) {
+    for (let x = 0; x < mapSizeX; x++) {
         let row = []
-        for (let x = 0; x < background[i].length; x++) {
-            row.push('valid')
+        for (let y = 0; y < mapSizeY; y++) {
+            if(target['x'] == x && target['y'] == y){
+                row.push({type:'g'})
+            }
+            else if(map[x][y]['type'] == 'bot'){
+                row.push({type:'v'})
+            }
+            else if(map[x][y]['type'] == 'wall' || map[x][y]['type'] == 'generator'){
+                row.push({type:'b'})
+            }
+            else{
+                row.push({type:'v'})
+            }
         }
         grid.push(row)
     }
-    for (let i = 0; i < foreground.length; i++) {
-        for (let x = 0; x < foreground[i].length; x++) {
-            if(foreground[i][x]['type'] == 'generator'){
-                grid[i][x] = 'blocked'
-            }
-        }
-    }
-    grid[target['x']][target['y']] = ('goal')
     return grid
 }
 
-function findShortestPath(startEntity, target){
-    let grid = translateMapToGrid(target)
+function calculateManhattanDistance(a, b){
+    return Math.abs(b['x'] - a['x']) + Math.abs(b['y'] - a['y'])
+}
 
-    let location = {
-        x: startEntity['x'],
-        y: startEntity['y'],
-        path: [],
-        status: 'start'
-    }
-
-    let queue = [location]
-
+function findShortestPath(bot, target, map){
+    let grid = mapToGridWithManhattanDistances(target, map)
+    bot['path'] = []
+    bot['type'] = grid[bot['x']][bot['y']]['type']
+    let queue = [bot]
     while(queue.length > 0){
-        let currentLocation = queue.shift()
-        let directions = ['north', 'east', 'south', 'west']
+        let lowestIndex = 0
+        for (let i = 0; i < queue.length; i++) {
+            if(queue[lowestIndex]['manhattan'] > queue[i]['manhattan']) { lowestIndex = i }
+        }
+        let currentLocation = queue[lowestIndex]
+        queue.splice(lowestIndex, 1)
+        let directions = ['up', 'down', 'left', 'right']
         for (let i = 0; i < directions.length; i++) {
             let newLocation = retrieveNeighboursFromDirection(currentLocation, directions[i], grid)
-            if(newLocation['status'] == 'goal'){
+            if(newLocation['type'] == 'g'){
                 grid = []
                 queue = []
                 return newLocation['path']
             }
-            else if(newLocation.status == 'valid'){
+            else if(newLocation['type'] == 'v'){
+                grid[newLocation['x']][newLocation['y']]['type'] = 's'
+                background[newLocation['x']][newLocation['y']]['color'] = 'blue'
+                newLocation['manhattan'] = calculateManhattanDistance(newLocation, target)
                 queue.push(newLocation)
             }   
         }
     }
-
     return false
 }
 
@@ -487,49 +497,19 @@ function retrieveNeighboursFromDirection(currentLocation, direction, grid){
     newPath.push(direction)
     let x = currentLocation['x']
     let y = currentLocation['y']
-
-    if(direction == 'east'){
+    if(direction == 'right' && x+1 < mapSizeX){
         x++
     }
-    else if (direction == 'west'){
+    else if (direction == 'left' && x-1 >= 0){
         x--
     }
-    else if (direction == 'south'){
+    else if (direction == 'down' && y+1 < mapSizeY){
         y++
     }
-    else if (direction == 'north'){
+    else if (direction == 'up' && y-1 >= 0){
         y--
     }
-    
-    let newLocation = {
-        x: x,
-        y: y,
-        path: newPath,
-        status: 'unknown'
-    }
-    newLocation['status'] = retrieveLocationStatus(newLocation, grid)
-
-    if(newLocation['status'] == 'valid'){
-        background[newLocation['x']][newLocation['y']]['color'] = 'blue'
-        grid[newLocation['x']][newLocation['y']] = 'visited'
-    }
-
-    return newLocation
-}
-
-function retrieveLocationStatus(location, grid){
-    if(location['x'] >= mapSizeX || location['x'] < 0 || location['y'] >= mapSizeY || location['y'] < 0){
-        return 'invalid'
-    }
-    else if(grid[location['x']][location['y']] == 'valid'){
-        return 'valid'
-    }
-    else if (grid[location['x']][location['y']] == 'goal'){
-        return 'goal'
-    }
-    else if (grid[location['x']][location['y']] == 'blocked' || grid[location['x']][location['y']] == 'visited'){
-        return 'blocked'
-    }
+    return {x:x,y:y,path:newPath,manhattan:grid[x][y]['manhattan'], type:grid[x][y]['type']}
 }
 
 d2 = new Date()
