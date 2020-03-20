@@ -168,6 +168,16 @@ app.get('/register', function(req, res){
     }
 })
 
+app.get('/logout', function(req, res){
+    if(req.session.user != null){
+        req.session.destroy()
+        res.redirect('/login')
+    }
+    else{
+        res.redirect('/login')
+    }
+})
+
 app.get('*', function(req, res){
     res.send('Sorry, this is an invalid URL.')
 })
