@@ -206,17 +206,13 @@ app.post('/login', function(req, res){
                 }
                 else{
                     if(bcrypt.compareSync(req.body.password, result[0]['password'])){
-                        let userDataQuery = createGetDataString('users', {username:req.body.username})
-                        userDataQuery += " JOIN stats ON users.username = stats.username"
-                        console.log(userDataQuery)
+                        let userDataQuery = "SELECT * FROM users INNER JOIN stats ON users.username = stats.username WHERE users.username = '" + req.body.username + "'"
                         con.query(userDataQuery, function(err, result){
                             if(err){
-                                console.log(err)
                                 errors.push("user doesn't exist")
                                 res.render("login", {errors: errors, input: userInput})
                             }
                             else{
-                                console.log(result)
                                 req.session.user = {name:result[0]['name'],username:result[0]['username'],email:result[0]['email'],level:result[0]['level'],xp:result[0]['xp'],currency:result[0]['currency']}
                                 res.redirect('/')
                             }
@@ -281,16 +277,13 @@ app.post('/register', function(req, res){
                         res.render("register", {errors: errors, input: userInput})
                     }
                     else{
-                        let userDataQuery = createGetDataString('users', {username:req.body.username})
-                        userDataQuery += " JOIN stats ON users.username = stats.username" 
+                        let userDataQuery = "SELECT * FROM users INNER JOIN stats ON users.username = stats.username WHERE users.username = '" + req.body.username + "'"
                         con.query(userDataQuery, function(err, result){
                             if(err){
                                 console.log(err)
                             }
                             else{
-                                console.log(result[0])
                                 req.session.user = {name:result[0]['name'],username:result[0]['username'],email:result[0]['email'],level:result[0]['level'],xp:result[0]['xp'],currency:result[0]['currency']}
-                                console.log(req.session.user)
                                 res.redirect('/')
                             }
                         })
