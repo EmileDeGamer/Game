@@ -382,9 +382,9 @@ function checkOnDuplicateName(bot, attempt = 0){
     }
 }   
 
-for (let x = 0; x < bots.length; x++) {
+/*for (let x = 0; x < bots.length; x++) {
     moveEntityTowardsTarget(bots[x], generators[Math.floor(Math.random() * generators.length)], foreground, false)
-}
+}*/
 //#endregion
 
 //#region pathfinding
