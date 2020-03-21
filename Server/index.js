@@ -134,7 +134,7 @@ app.use(express.static('public'))
 //#region pages
 app.get('/', function(req, res){
     if(req.session.user != null){
-        res.render('index')
+        res.render("index", {userData: req.session.user})
     }
     else{
         res.redirect('/login')

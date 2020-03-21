@@ -25,7 +25,7 @@ let mapSizeY
 let button = document.getElementById('createBot')
 
 button.onclick = function(){
-    socket.emit('createBot', {username:'EmileDeGamer'})
+    socket.emit('createBot', {username:username})
 }
 
 let socket = io()
