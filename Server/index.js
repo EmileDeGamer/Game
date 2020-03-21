@@ -194,8 +194,8 @@ app.post('/login', function(req, res){
         errors.push("Password can't be empty")
     }
     if(errors.length == 0){
-        let query = createGetDataString("users", {username:req.body.username})
-        con.query(query, function(err, result){
+        let getUsername = createGetDataString("users", {username:req.body.username})
+        con.query(getUsername, function(err, result){
             if(err){
                 console.log(err)
             }
@@ -205,10 +205,22 @@ app.post('/login', function(req, res){
                     res.render("login", {errors: errors, input: userInput})
                 }
                 else{
-                    let data = result[0]
-                    if(bcrypt.compareSync(req.body.password, data['password'])){
-                        req.session.user = userInput
-                        res.redirect('/')
+                    if(bcrypt.compareSync(req.body.password, result[0]['password'])){
+                        let userDataQuery = createGetDataString('users', {username:req.body.username})
+                        userDataQuery += " JOIN stats ON users.username = stats.username"
+                        console.log(userDataQuery)
+                        con.query(userDataQuery, function(err, result){
+                            if(err){
+                                console.log(err)
+                                errors.push("user doesn't exist")
+                                res.render("login", {errors: errors, input: userInput})
+                            }
+                            else{
+                                console.log(result)
+                                req.session.user = {name:result[0]['name'],username:result[0]['username'],email:result[0]['email'],level:result[0]['level'],xp:result[0]['xp'],currency:result[0]['currency']}
+                                res.redirect('/')
+                            }
+                        })
                     }
                     else{
                         errors.push('wrong password, try again')
@@ -255,15 +267,35 @@ app.post('/register', function(req, res){
     }
     if(errors.length === 0){
         let hash = bcrypt.hashSync(req.body.password, 8)
-        let query = createInsertString('users', {name:req.body.name, username:req.body.username, email:req.body.email, password:hash})
-        con.query(query, function(err, result){
+        let createUserQuery = createInsertString('users', {name:req.body.name, username:req.body.username, email:req.body.email, password:hash})
+        con.query(createUserQuery, function(err, result){
             if(err){
                 errors.push("Username already in use")
                 res.render("register", {errors: errors, input: userInput})
             }
             else{
-                req.session.user = userInput
-                res.redirect('/')
+                let createStatsQuery = createInsertString('stats', {username:req.body.username})
+                con.query(createStatsQuery, function(err, result){
+                    if(err){
+                        errors.push("Username already in use")
+                        res.render("register", {errors: errors, input: userInput})
+                    }
+                    else{
+                        let userDataQuery = createGetDataString('users', {username:req.body.username})
+                        userDataQuery += " JOIN stats ON users.username = stats.username" 
+                        con.query(userDataQuery, function(err, result){
+                            if(err){
+                                console.log(err)
+                            }
+                            else{
+                                console.log(result[0])
+                                req.session.user = {name:result[0]['name'],username:result[0]['username'],email:result[0]['email'],level:result[0]['level'],xp:result[0]['xp'],currency:result[0]['currency']}
+                                console.log(req.session.user)
+                                res.redirect('/')
+                            }
+                        })
+                    }
+                })
             }
         })
     }
@@ -314,12 +346,17 @@ for (let i = 0; i < mapSizeX; i++) {
     let backgroundRow = []
     let foregroundRow = []
     for (let x = 0; x < mapSizeY; x++) {
-        backgroundRow.push({color:'lightblue'})
+        backgroundRow.push({color:'lightblue',type:''})
         foregroundRow.push({})
     }
     background.push(backgroundRow)
     foreground.push(foregroundRow)
 }
+
+background[50][51] = {type:'mud',color:'orange'}
+background[51][50] = {type:'mud',color:'orange'}
+background[50][49] = {type:'mud',color:'orange'}
+background[49][50] = {type:'mud',color:'orange'}
 
 for (let i = 0; i < botClasses.length; i++) {
     botClasses[i] = require(botClasses[i])
@@ -328,6 +365,7 @@ for (let i = 0; i < botClasses.length; i++) {
     bot['y'] = spawnY
     bot['map'] = background
     bot['type'] = 'bot'
+    bot['speed'] = 10
     bots.push(bot)
     foreground[bot['x']][bot['y']] = bot
 }
@@ -391,43 +429,72 @@ function moveEntityTowardsTarget(bot, target, map, moveOnTheTarget){
         console.log('unreachable target')
     }
     else{
-        for (let i = 0; i < route.length; i++) {
-            setTimeout(function() { 
-                if(moveOnTheTarget){
-                    movementController(bot, route, i)
-                    if(i == route.length - 1){
-                        checkWhatToDo(bot, target)
-                    }
-                }
-                else{
-                    if(i != route.length - 1){ 
-                        movementController(bot, route, i)
-                    }
-                    else{
-                        checkWhatToDo(bot, target)
-                    }
-                }
-            }, 100 * i) 
-        }
+        setTimeout(function(){botBehaviour(0, moveOnTheTarget, route, bot, target)}, 1000 / bot['speed']) 
     }
 }
 
-function movementController(bot, route, i){
-    if(route[i] == 'up'){
+function botBehaviour(index, moveOnTheTarget, route, bot, target){
+    if(index == route.length){
+        return
+    }
+    if(moveOnTheTarget){
+        movementController(bot, route[index])
+        if(index == route.length - 1){
+            checkWhatToDo(bot, target)
+        }
+    }
+    else{
+        if(index != route.length - 1){ 
+            movementController(bot, route[index])
+        }
+        else{
+            checkWhatToDo(bot, target)
+        }
+    }
+    index++
+    setTimeout(function(){botBehaviour(index, moveOnTheTarget, route, bot, target)}, 1000 / bot['speed'])
+}
+
+function movementController(bot, route){
+    if(route == 'up'){
         bot['y']--
-        background[bot['x']][bot['y']]['color'] = 'green'
+        if(background[bot['x']][bot['y']]['type'] == 'mud'){
+            bot['speed'] = 5
+        }
+        else{
+            bot['speed'] = 10
+        }
+        //background[bot['x']][bot['y']]['color'] = 'green'
     }
-    else if (route[i] == 'right'){
+    else if (route == 'right'){
         bot['x']++
-        background[bot['x']][bot['y']]['color'] = 'green'
+        if(background[bot['x']][bot['y']]['type'] == 'mud'){
+            bot['speed'] = 5
+        }
+        else{
+            bot['speed'] = 10
+        }
+        //background[bot['x']][bot['y']]['color'] = 'green'
     }
-    else if (route[i] == 'down'){
+    else if (route == 'down'){
         bot['y']++
-        background[bot['x']][bot['y']]['color'] = 'green'
+        if(background[bot['x']][bot['y']]['type'] == 'mud'){
+            bot['speed'] = 5
+        }
+        else{
+            bot['speed'] = 10
+        }
+        //background[bot['x']][bot['y']]['color'] = 'green'
     }
-    else if (route[i] == 'left'){
+    else if (route == 'left'){
         bot['x']--
-        background[bot['x']][bot['y']]['color'] = 'green'
+        if(background[bot['x']][bot['y']]['type'] == 'mud'){
+            bot['speed'] = 5
+        }
+        else{
+            bot['speed'] = 10
+        }
+        //background[bot['x']][bot['y']]['color'] = 'green'
     }
 }
 
