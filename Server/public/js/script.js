@@ -24,14 +24,18 @@ let mapSizeY
 
 let button = document.getElementById('createBot')
 
+let socket = io()
+
 button.onclick = function(){
     socket.emit('createBot', {username:username})
 }
 
-let socket = io()
-
 socket.on('connect', function(){
     console.log('connection made!')
+})
+
+socket.on('ownedBots', function(data){
+    console.log(data)
 })
 
 socket.on('createMap', function(data){

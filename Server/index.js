@@ -194,8 +194,7 @@ app.post('/login', function(req, res){
         errors.push("Password can't be empty")
     }
     if(errors.length == 0){
-        let getUsername = createGetDataString("users", {username:req.body.username})
-        con.query(getUsername, function(err, result){
+        con.query(createGetDataString("users", {username:req.body.username}), function(err, result){
             if(err){
                 console.log(err)
             }
@@ -263,15 +262,13 @@ app.post('/register', function(req, res){
     }
     if(errors.length === 0){
         let hash = bcrypt.hashSync(req.body.password, 8)
-        let createUserQuery = createInsertString('users', {name:req.body.name, username:req.body.username, email:req.body.email, password:hash})
-        con.query(createUserQuery, function(err, result){
+        con.query(createInsertString('users', {name:req.body.name, username:req.body.username, email:req.body.email, password:hash}), function(err, result){
             if(err){
                 errors.push("Username already in use")
                 res.render("register", {errors: errors, input: userInput})
             }
             else{
-                let createStatsQuery = createInsertString('stats', {username:req.body.username})
-                con.query(createStatsQuery, function(err, result){
+                con.query(createInsertString('stats', {username:req.body.username}), function(err, result){
                     if(err){
                         errors.push("Username already in use")
                         res.render("register", {errors: errors, input: userInput})
@@ -573,45 +570,41 @@ d2 = new Date()
 console.log("Generating bots and finding their shortest path took " + (d2.getTime() - d1.getTime()) + " ms")
 //#endregion
 
-/*for (let i = 0; i < botClasses.length; i++) {
-    let bot = new botClasses[i]['main']
-    bot['x'] = spawnX
-    bot['y'] = spawnY
-    bot['map'] = background
-    bot['type'] = 'bot'
-    bot['speed'] = 10
-    bot['energy'] = 0
-    bot['maxEnergy'] = 10
-    bot['owner'] = 'EmileDeGamer'
-    bot['name'] = 'henk'
-    bot['color'] = 'black'
-    foreground[bot['x']][bot['y']] = bot
-    checkOnDuplicateName(bot)
-}*/
-
 //#region realtime updates
 io.on('connection', function(socket){
     console.log('connection made!')  
     socket.emit('createMap', {maxX: maxX, maxY: maxY, pieceSize: pieceSize})
-
     socket.on('createBot', function(data){
         for (let i = 0; i < botClasses.length; i++) {
             if(data['username'] == botClasses[i]['username']){
                 let bot = new botClasses[i]['main']
                 bot['x'] = spawnX
                 bot['y'] = spawnY
-                bot['map'] = background
+                foreground[bot['x']][bot['y']] = bot
+                bot['map'] = foreground
                 bot['type'] = 'bot'
                 bot['speed'] = 10
                 bot['energy'] = 0
                 bot['maxEnergy'] = 10
-                bot['owner'] = data['owner']
+                bot['owner'] = data['username']
                 bot['name'] = 'bot'
                 bot['color'] = 'black'
-                foreground[bot['x']][bot['y']] = bot
-                checkOnDuplicateName(bot) 
+                bot['queue'] = []
+                bot['mapSizeX'] = mapSizeX
+                bot['mapSizeY'] = mapSizeY
+                checkOnDuplicateName(bot)
+                bot.init()
             }
         }
+        let ownedBots = []
+        for (let i = 0; i < bots.length; i++) {
+            if(bots[i]['owner'] == data['username']){
+                let tBot = bots[i]
+                tBot['map'] = undefined
+                ownedBots.push(tBot)
+            }
+        }
+        socket.emit('ownedBots', ownedBots)
     })
 
     //#region disconnecting for testing, later bots when they die they will be removed from array
@@ -640,8 +633,11 @@ io.on('connection', function(socket){
         for (let i = 0; i < generators.length; i++) {
             foreground[generators[i]['x']][generators[i]['y']] = generators[i]
         }
-        for (let x = 0; x < bots.length; x++) {
-            foreground[bots[x]['x']][bots[x]['y']] = bots[x]
+        for (let i = 0; i < bots.length; i++) {
+            foreground[bots[i]['x']][bots[i]['y']] = bots[i]
+        }
+        for (let i = 0; i < bots.length; i++) {
+            bots[i]['map'] = foreground
         }
         io.emit('updateMap', {map:foreground, name:'foreground'})
     }, 1000/10)
