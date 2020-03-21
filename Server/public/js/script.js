@@ -22,6 +22,12 @@ let mapSizeX
 let mapSizeY
 //#endregion
 
+let button = document.getElementById('createBot')
+
+button.onclick = function(){
+    socket.emit('createBot', {username:'EmileDeGamer'})
+}
+
 let socket = io()
 
 socket.on('connect', function(){
@@ -134,7 +140,7 @@ setInterval(() => {
             for (let i = 0; i < foregroundMap.length; i++) {
                 for (let x = 0; x < foregroundMap[i].length; x++) {
                     if(foregroundMap[i][x]['name'] == object['name']){
-                        let dataToDisplay = foregroundMap[object['x']][object['y']]
+                        let dataToDisplay = foregroundMap[i][x]
                         dataToDisplay['map'] = undefined
                         selectedDisplay.innerHTML = JSON.stringify(dataToDisplay)
                         break

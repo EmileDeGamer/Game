@@ -316,7 +316,6 @@ let pieceSize = 10 //in pixels
 //#endregion
 
 //#region classes
-//let Bot = require("./classes/BotBase")
 let EnergyGenerator = require("./classes/EnergyGeneratorBase")
 
 let users = fs.readdirSync('./classes/bots/')
@@ -325,9 +324,14 @@ for (let i = 0; i < users.length; i++) {
     let userBotFolder = fs.readdirSync('./classes/bots/' + users[i])
     for (let x = 0; x < userBotFolder.length; x++) {
         if(userBotFolder[x] == 'main.js'){
-            botClasses.push('./classes/bots/' + users[i] + '/' + userBotFolder[x])
+            botClasses.push({main:'./classes/bots/' + users[i] + '/' + userBotFolder[x],username:users[i]})
         }
     }
+}
+
+for (let i = 0; i < botClasses.length; i++) {
+    botClasses[i]['main'] = require(botClasses[i]['main'])
+    console.log(botClasses[i]['username'])
 }
 //#endregion
 
@@ -339,28 +343,11 @@ for (let i = 0; i < mapSizeX; i++) {
     let backgroundRow = []
     let foregroundRow = []
     for (let x = 0; x < mapSizeY; x++) {
-        backgroundRow.push({color:'lightblue',type:''})
+        backgroundRow.push({color:'lightblue'})
         foregroundRow.push({})
     }
     background.push(backgroundRow)
     foreground.push(foregroundRow)
-}
-
-background[50][51] = {type:'mud',color:'orange'}
-background[51][50] = {type:'mud',color:'orange'}
-background[50][49] = {type:'mud',color:'orange'}
-background[49][50] = {type:'mud',color:'orange'}
-
-for (let i = 0; i < botClasses.length; i++) {
-    botClasses[i] = require(botClasses[i])
-    let bot = new botClasses[i]
-    bot['x'] = spawnX
-    bot['y'] = spawnY
-    bot['map'] = background
-    bot['type'] = 'bot'
-    bot['speed'] = 10
-    bots.push(bot)
-    foreground[bot['x']][bot['y']] = bot
 }
 
 console.log("Generating foreground and background took " + (d2.getTime() - d1.getTime()) + " ms")
@@ -385,29 +372,18 @@ function generateItemOnAvailablePlace(entity, array){
 d2 = new Date()
 console.log("Generating energy generators took " + (d2.getTime() - d1.getTime()) + " ms")
 
-
 console.log("Creating bots...")
 d1 = new Date()
-/*function checkOnDuplicateName(data, attempt){
-    /*if(bots.map(function(e) { return e.name; }).indexOf(data) == -1){
-        bots.push(new Bot(data, spawnX, spawnY, data))
+function checkOnDuplicateName(bot, attempt = 0){
+    let tName = bot['name'] + attempt
+    if(bots.map(function(b) { if(b['owner'] == bot['owner']){return b['name']} }).indexOf(tName) == -1){
+        bot['name'] += attempt
+        bots.push(bot)
     }
     else{
-        /*if(attempt == 0){
-            data = data+0
-        }
-        else{
-            data = data.replace(attempt-1, attempt)
-        }
-        data+=attempt
-        bots.push(new Bot(data, spawnX, spawnY, data))
-    //checkOnDuplicateName(data, attempt)
-    //}
-}
-
-/*for (let i = 0; i < 500; i++) { //testing amount
-    checkOnDuplicateName('test', i)
-} */   
+        checkOnDuplicateName(bot, attempt+=1)
+    }
+}   
 
 for (let x = 0; x < bots.length; x++) {
     moveEntityTowardsTarget(bots[x], generators[Math.floor(Math.random() * generators.length)], foreground, false)
@@ -457,7 +433,7 @@ function movementController(bot, route){
         else{
             bot['speed'] = 10
         }
-        //background[bot['x']][bot['y']]['color'] = 'green'
+        background[bot['x']][bot['y']]['color'] = 'green'
     }
     else if (route == 'right'){
         bot['x']++
@@ -467,7 +443,7 @@ function movementController(bot, route){
         else{
             bot['speed'] = 10
         }
-        //background[bot['x']][bot['y']]['color'] = 'green'
+        background[bot['x']][bot['y']]['color'] = 'green'
     }
     else if (route == 'down'){
         bot['y']++
@@ -477,7 +453,7 @@ function movementController(bot, route){
         else{
             bot['speed'] = 10
         }
-        //background[bot['x']][bot['y']]['color'] = 'green'
+        background[bot['x']][bot['y']]['color'] = 'green'
     }
     else if (route == 'left'){
         bot['x']--
@@ -487,7 +463,7 @@ function movementController(bot, route){
         else{
             bot['speed'] = 10
         }
-        //background[bot['x']][bot['y']]['color'] = 'green'
+        background[bot['x']][bot['y']]['color'] = 'green'
     }
 }
 
@@ -597,10 +573,47 @@ d2 = new Date()
 console.log("Generating bots and finding their shortest path took " + (d2.getTime() - d1.getTime()) + " ms")
 //#endregion
 
+/*for (let i = 0; i < botClasses.length; i++) {
+    let bot = new botClasses[i]['main']
+    bot['x'] = spawnX
+    bot['y'] = spawnY
+    bot['map'] = background
+    bot['type'] = 'bot'
+    bot['speed'] = 10
+    bot['energy'] = 0
+    bot['maxEnergy'] = 10
+    bot['owner'] = 'EmileDeGamer'
+    bot['name'] = 'henk'
+    bot['color'] = 'black'
+    foreground[bot['x']][bot['y']] = bot
+    checkOnDuplicateName(bot)
+}*/
+
 //#region realtime updates
 io.on('connection', function(socket){
     console.log('connection made!')  
     socket.emit('createMap', {maxX: maxX, maxY: maxY, pieceSize: pieceSize})
+
+    socket.on('createBot', function(data){
+        for (let i = 0; i < botClasses.length; i++) {
+            if(data['username'] == botClasses[i]['username']){
+                let bot = new botClasses[i]['main']
+                bot['x'] = spawnX
+                bot['y'] = spawnY
+                bot['map'] = background
+                bot['type'] = 'bot'
+                bot['speed'] = 10
+                bot['energy'] = 0
+                bot['maxEnergy'] = 10
+                bot['owner'] = data['owner']
+                bot['name'] = 'bot'
+                bot['color'] = 'black'
+                foreground[bot['x']][bot['y']] = bot
+                checkOnDuplicateName(bot) 
+            }
+        }
+    })
+
     //#region disconnecting for testing, later bots when they die they will be removed from array
     socket.on('disconnect', function(){
         console.log('disconnected! :(')
