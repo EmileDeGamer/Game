@@ -375,7 +375,6 @@ function checkOnDuplicateName(bot, attempt = 0){
     let tName = bot['name'] + attempt
     if(bots.map(function(b) { if(b['owner'] == bot['owner']){return b['name']} }).indexOf(tName) == -1){
         bot['name'] += attempt
-        bots.push(bot)
     }
     else{
         checkOnDuplicateName(bot, attempt+=1)
@@ -400,9 +399,6 @@ function moveEntityTowardsTarget(bot, target, map, moveOnTheTarget){
 }
 
 function botBehaviour(index, moveOnTheTarget, route, bot, target){
-    if(index == route.length){
-        return
-    }
     if(moveOnTheTarget){
         movementController(bot, route[index])
         if(index == route.length - 1){
@@ -416,6 +412,9 @@ function botBehaviour(index, moveOnTheTarget, route, bot, target){
         else{
             checkWhatToDo(bot, target)
         }
+    }
+    if(index == route.length){
+        return
     }
     index++
     setTimeout(function(){botBehaviour(index, moveOnTheTarget, route, bot, target)}, 1000 / bot['speed'])
@@ -580,8 +579,6 @@ io.on('connection', function(socket){
                 let bot = new botClasses[i]['main']
                 bot['x'] = spawnX
                 bot['y'] = spawnY
-                foreground[bot['x']][bot['y']] = bot
-                bot['map'] = foreground
                 bot['type'] = 'bot'
                 bot['speed'] = 10
                 bot['energy'] = 0
@@ -590,18 +587,21 @@ io.on('connection', function(socket){
                 bot['name'] = 'bot'
                 bot['color'] = 'black'
                 bot['queue'] = []
-                bot['mapSizeX'] = mapSizeX
+                bot['returnedData'] = []
+                /*bot['mapSizeX'] = mapSizeX
                 bot['mapSizeY'] = mapSizeY
+                foreground[bot['x']][bot['y']] = bot
+                bot['map'] = foreground
+                */
                 checkOnDuplicateName(bot)
                 bot.init()
+                bots.push(bot)
             }
         }
         let ownedBots = []
         for (let i = 0; i < bots.length; i++) {
             if(bots[i]['owner'] == data['username']){
-                let tBot = bots[i]
-                tBot['map'] = undefined
-                ownedBots.push(tBot)
+                ownedBots.push(bots[i])
             }
         }
         socket.emit('ownedBots', ownedBots)
@@ -636,11 +636,35 @@ io.on('connection', function(socket){
         for (let i = 0; i < bots.length; i++) {
             foreground[bots[i]['x']][bots[i]['y']] = bots[i]
         }
-        for (let i = 0; i < bots.length; i++) {
-            bots[i]['map'] = foreground
-        }
         io.emit('updateMap', {map:foreground, name:'foreground'})
     }, 1000/10)
     //#endregion
+
+    setInterval(() => {
+        for (let i = 0; i < bots.length; i++) {
+            if(bots[i].queue.length > 0){
+                let action = bots[i].queue.shift()
+                if(action['type'] == 'getPosData'){
+                    if(foreground[action['x']][action['y']]['name'] == bots[i]['name'] && foreground[action['x']][action['y']]['owner'] == bots[i]['owner']){
+                        bots[i]['returnedData'].push('you')
+                    }
+                    else if(JSON.stringify(foreground[action['x']][action['y']]) == "{}"){
+                        bots[i]['returnedData'].push('nothing')
+                    }
+                    else{
+                        bots[i]['returnedData'].push(foreground[action['x']][action['y']])
+                    }
+                }
+                else if(action['type'] == 'moveMeTo'){
+                    if(action['target']['type'] == 'generator'){
+                        moveEntityTowardsTarget(bots[i], action['target'], foreground, false)
+                    }
+                    else{
+                        moveEntityTowardsTarget(bots[i], action['target'], foreground, true)
+                    }
+                }
+            }
+        }
+    }, 1000)
 })
 //#endregion

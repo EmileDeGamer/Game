@@ -140,7 +140,10 @@ setInterval(() => {
     let selectedDisplayText = selectedDisplay.innerText
     if(selectedDisplayText != ''){
         let object = JSON.parse(selectedDisplayText)
-        if(object['type'] == 'bot'){
+        if(JSON.stringify(object) == "{}"){
+            selectedDisplay.innerHTML = ''
+        }
+        else if(object['type'] == 'bot'){
             for (let i = 0; i < foregroundMap.length; i++) {
                 for (let x = 0; x < foregroundMap[i].length; x++) {
                     if(foregroundMap[i][x]['name'] == object['name']){
@@ -154,9 +157,6 @@ setInterval(() => {
         }
         else if(object['type'] != 'bot'){
             selectedDisplay.innerHTML = JSON.stringify(foregroundMap[object['x']][object['y']])
-        }
-        else{
-            selectedDisplay.innerHTML = ''
         }
     }
 }, 1000/10)
