@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Gegenereerd op: 18 mrt 2020 om 16:19
+-- Gegenereerd op: 22 mrt 2020 om 14:37
 -- Serverversie: 10.1.38-MariaDB
 -- PHP-versie: 7.3.4
 
@@ -21,6 +21,41 @@ SET time_zone = "+00:00";
 --
 -- Database: `pokemongame`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `ownedpokemons`
+--
+
+CREATE TABLE `ownedpokemons` (
+  `id` int(11) NOT NULL,
+  `owner` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `pokemons`
+--
+
+CREATE TABLE `pokemons` (
+  `id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `stats`
+--
+
+CREATE TABLE `stats` (
+  `id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `level` int(11) NOT NULL DEFAULT '1',
+  `xp` int(11) NOT NULL DEFAULT '0',
+  `currency` int(11) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -43,6 +78,25 @@ CREATE TABLE `users` (
 --
 
 --
+-- Indexen voor tabel `ownedpokemons`
+--
+ALTER TABLE `ownedpokemons`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexen voor tabel `pokemons`
+--
+ALTER TABLE `pokemons`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexen voor tabel `stats`
+--
+ALTER TABLE `stats`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`);
+
+--
 -- Indexen voor tabel `users`
 --
 ALTER TABLE `users`
@@ -52,6 +106,24 @@ ALTER TABLE `users`
 --
 -- AUTO_INCREMENT voor geëxporteerde tabellen
 --
+
+--
+-- AUTO_INCREMENT voor een tabel `ownedpokemons`
+--
+ALTER TABLE `ownedpokemons`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT voor een tabel `pokemons`
+--
+ALTER TABLE `pokemons`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT voor een tabel `stats`
+--
+ALTER TABLE `stats`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT voor een tabel `users`
