@@ -29,7 +29,36 @@ body{
 }
 
 canvas{
-    left: 30%;
+    left: 37.5%;
     border: 5px solid black;
     cursor: none;
+}
+
+header{
+    ul{
+        list-style: none;
+        li{
+            a{
+                text-decoration: none;
+                color: black;
+            }
+            a:hover{
+                color: red;
+            }
+        }
+    }
+    border-bottom: 1px solid;
+}
+
+.content{
+    text-align: center;
+}
+
+footer{
+    border-top: 1px solid;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    bottom: 0;
+    box-sizing: border-box;
 }

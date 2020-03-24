@@ -32,8 +32,39 @@ body {
 }
 
 canvas {
-  left: 30%;
+  left: 37.5%;
   border: 5px solid black;
   cursor: none;
+}
+
+header {
+  border-bottom: 1px solid;
+}
+
+header ul {
+  list-style: none;
+}
+
+header ul li a {
+  text-decoration: none;
+  color: black;
+}
+
+header ul li a:hover {
+  color: red;
+}
+
+.content {
+  text-align: center;
+}
+
+footer {
+  border-top: 1px solid;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  bottom: 0;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
 }
 /*# sourceMappingURL=style.css.map */
