@@ -394,6 +394,25 @@ function moveEntityTowardsTarget(bot, target, map, moveOnTheTarget){
         console.log('unreachable target')
     }
     else{
+        let currentCoords = {x:bot['x'], y:bot['y']}
+        for (let i = 0; i < route.length; i++) {
+            if(route[i] == 'up'){
+                currentCoords['y']--
+                background[currentCoords['x']][currentCoords['y']]['color'] = 'green'
+            }
+            else if (route[i] == 'right'){
+                currentCoords['x']++
+                background[currentCoords['x']][currentCoords['y']]['color'] = 'green'
+            }
+            else if (route[i] == 'down'){
+                currentCoords['y']++
+                background[currentCoords['x']][currentCoords['y']]['color'] = 'green'
+            }
+            else if (route[i] == 'left'){
+                currentCoords['x']--
+                background[currentCoords['x']][currentCoords['y']]['color'] = 'green'
+            }
+        }
         setTimeout(function(){botBehaviour(0, moveOnTheTarget, route, bot, target)}, 1000 / bot['speed']) 
     }
 }
@@ -429,7 +448,7 @@ function movementController(bot, route){
         else{
             bot['speed'] = 10
         }
-        background[bot['x']][bot['y']]['color'] = 'green'
+        //background[bot['x']][bot['y']]['color'] = 'green'
     }
     else if (route == 'right'){
         bot['x']++
@@ -439,7 +458,7 @@ function movementController(bot, route){
         else{
             bot['speed'] = 10
         }
-        background[bot['x']][bot['y']]['color'] = 'green'
+        //background[bot['x']][bot['y']]['color'] = 'green'
     }
     else if (route == 'down'){
         bot['y']++
@@ -449,7 +468,7 @@ function movementController(bot, route){
         else{
             bot['speed'] = 10
         }
-        background[bot['x']][bot['y']]['color'] = 'green'
+        //background[bot['x']][bot['y']]['color'] = 'green'
     }
     else if (route == 'left'){
         bot['x']--
@@ -459,7 +478,7 @@ function movementController(bot, route){
         else{
             bot['speed'] = 10
         }
-        background[bot['x']][bot['y']]['color'] = 'green'
+        //background[bot['x']][bot['y']]['color'] = 'green'
     }
 }
 
@@ -468,20 +487,22 @@ function checkWhatToDo(bot, target){
         let obtainEnergyTimer = setInterval(() => {
             if(bot['energy'] >= bot['maxEnergy']){
                 bot['energy'] = bot['maxEnergy']
-                moveEntityTowardsTarget(bot, {x:spawnX, y:spawnY, type:'spawn'}, foreground, true)
+                //moveEntityTowardsTarget(bot, {x:spawnX, y:spawnY, type:'spawn'}, foreground, true)
                 clearInterval(obtainEnergyTimer)
             }
 
-            if(target['energy'] > 0){
+            if(bot['maxEnergy'] > bot['energy']){
                 if(target['energy'] > 0){
-                    bot['energy']++
-                    target['energy']--
-                }
-                else if (target['energy'] == 0){
-                    setTimeout(() => {
+                    if(target['energy'] > 0){
                         bot['energy']++
                         target['energy']--
-                    },target['generationInterval']);
+                    }
+                    else if (target['energy'] == 0){
+                        setTimeout(() => {
+                            bot['energy']++
+                            target['energy']--
+                        },target['generationInterval']);
+                    }
                 }
             }
         }, 500)
