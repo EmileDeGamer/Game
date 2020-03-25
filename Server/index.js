@@ -309,6 +309,7 @@ let maxY = 99
 let mapSizeX = maxX + 1
 let mapSizeY = maxY + 1
 let spawnX = Math.floor(mapSizeX / 2), spawnY = Math.floor(mapSizeY / 2)
+let spawn = {x: spawnX, y: spawnY, type: 'spawn'}
 let pieceSize = 10 //in pixels
 //#endregion
 
@@ -487,6 +488,7 @@ function checkWhatToDo(bot, target){
         let obtainEnergyTimer = setInterval(() => {
             if(bot['energy'] >= bot['maxEnergy']){
                 bot['energy'] = bot['maxEnergy']
+                bot['returnedData'].push('fullWithEnergy')
                 //moveEntityTowardsTarget(bot, {x:spawnX, y:spawnY, type:'spawn'}, foreground, true)
                 clearInterval(obtainEnergyTimer)
             }
@@ -609,6 +611,7 @@ io.on('connection', function(socket){
                 bot['color'] = 'black'
                 bot['queue'] = []
                 bot['returnedData'] = []
+                bot['spawn'] = spawn
                 /*bot['mapSizeX'] = mapSizeX
                 bot['mapSizeY'] = mapSizeY
                 foreground[bot['x']][bot['y']] = bot

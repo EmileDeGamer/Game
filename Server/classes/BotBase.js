@@ -10,17 +10,27 @@ module.exports = class Bot {
         this.maxEnergy
         this.queue //the queue for all the given commands
         this.returnedData //the data from the queued commands
-        this.map
-        this.mapSizeX
-        this.mapSizeY
+        //this.map
+        //this.mapSizeX
+        //this.mapSizeY
+        this.spawn
     }    
 
     init(){
         console.log(this['owner'] + this['name'])
         this.whatIsOn(0,0)
-        setTimeout(() => {
-            this.moveMeTo(this.returnedData.shift())
-        }, 1000)
+        
+        setInterval(() => {
+            if(this.returnedData.length > 0){
+                let task = this.returnedData.shift()
+                if(task == "fullWithEnergy"){
+                    this.moveMeTo(this.spawn)
+                }
+                else{
+                    this.moveMeTo(task)
+                }
+            }
+        }, 5000)
     }
 
     whatIsOn(x, y){
