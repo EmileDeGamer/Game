@@ -335,7 +335,6 @@ for (let i = 0; i < botClasses.length; i++) {
 
 //#region generate game entities
 let d1 = new Date()
-let d2 = new Date()
 console.log("Generating foreground and background...")
 for (let i = 0; i < mapSizeX; i++) {
     let backgroundRow = []
@@ -347,7 +346,7 @@ for (let i = 0; i < mapSizeX; i++) {
     background.push(backgroundRow)
     foreground.push(foregroundRow)
 }
-
+let d2 = new Date()
 console.log("Generating foreground and background took " + (d2.getTime() - d1.getTime()) + " ms")
 console.log("Generating energy generators...")
 d1 = new Date()
