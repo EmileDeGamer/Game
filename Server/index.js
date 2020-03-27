@@ -488,11 +488,9 @@ function checkWhatToDo(bot, target){
         let obtainEnergyTimer = setInterval(() => {
             if(bot['energy'] >= bot['maxEnergy']){
                 bot['energy'] = bot['maxEnergy']
-                bot['returnedData'].push('fullWithEnergy')
-                //moveEntityTowardsTarget(bot, {x:spawnX, y:spawnY, type:'spawn'}, foreground, true)
+                bot['returnedData'].push(bot['spawn'])
                 clearInterval(obtainEnergyTimer)
             }
-
             if(bot['maxEnergy'] > bot['energy']){
                 if(target['energy'] > 0){
                     if(target['energy'] > 0){
@@ -612,6 +610,7 @@ io.on('connection', function(socket){
                 bot['queue'] = []
                 bot['returnedData'] = []
                 bot['spawn'] = spawn
+                bot['ready'] = true
                 /*bot['mapSizeX'] = mapSizeX
                 bot['mapSizeY'] = mapSizeY
                 foreground[bot['x']][bot['y']] = bot
@@ -664,31 +663,45 @@ io.on('connection', function(socket){
     }, 1000/10)
     //#endregion
 
+    //area where users send commands to the server
     setInterval(() => {
         for (let i = 0; i < bots.length; i++) {
-            if(bots[i].queue.length > 0){
-                let action = bots[i].queue.shift()
-                if(action['type'] == 'getPosData'){
-                    if(foreground[action['x']][action['y']]['name'] == bots[i]['name'] && foreground[action['x']][action['y']]['owner'] == bots[i]['owner']){
-                        bots[i]['returnedData'].push('you')
-                    }
-                    else if(JSON.stringify(foreground[action['x']][action['y']]) == "{}"){
-                        bots[i]['returnedData'].push('nothing')
+            if(bots[i]['queue'].length > 0 && bots[i]['ready']){
+                let command = bots[i].queue.shift()
+                bots[i]['ready'] = false
+                if(typeof command['x'] !== 'undefined' && typeof command['y'] !== 'undefined'){
+                    if(typeof command['type'] !== 'undefined'){
+                        if(command['type'] == 'generator'){
+                            moveEntityTowardsTarget(bots[i], command, foreground, false)
+                            bots[i]['ready'] = true
+                        }
+                        else if(command['type'] == 'spawn'){
+                            moveEntityTowardsTarget(bots[i], command, foreground, true)
+                            bots[i]['ready'] = true
+                        }
                     }
                     else{
-                        bots[i]['returnedData'].push(foreground[action['x']][action['y']])
+                        if(foreground[command['x']][command['y']]['name'] == bots[i]['name'] && foreground[command['x']][command['y']]['owner'] == bots[i]['owner']){
+                            //returnDataToBot(bots[i], 'you')
+                        }
+                        else if(JSON.stringify(foreground[command['x']][command['y']]) == "{}"){
+                            //returnDataToBot(bots[i], 'nothing')
+                        }
+                        else{
+                            returnDataToBot(bots[i], foreground[command['x']][command['y']])
+                        }
                     }
                 }
-                else if(action['type'] == 'moveMeTo'){
-                    if(action['target']['type'] == 'generator'){
-                        moveEntityTowardsTarget(bots[i], action['target'], foreground, false)
-                    }
-                    else{
-                        moveEntityTowardsTarget(bots[i], action['target'], foreground, true)
-                    }
+                else{
+                    //returnDataToBot(bots[i], 'you gave no x and y')
                 }
             }
         }
     }, 1000)
 })
+
+function returnDataToBot(bot, data){
+    bot['returnedData'].push(data)
+    bot['ready'] = true
+}
 //#endregion

@@ -18,26 +18,19 @@ module.exports = class Bot {
 
     init(){
         console.log(this['owner'] + this['name'])
-        this.whatIsOn(0,0)
+        this.sendCommand({x:0,y:0})
         
         setInterval(() => {
             if(this.returnedData.length > 0){
                 let task = this.returnedData.shift()
-                if(task == "fullWithEnergy"){
-                    this.moveMeTo(this.spawn)
-                }
-                else{
-                    this.moveMeTo(task)
+                if(typeof task['type'] !== undefined){
+                    this.queue.push(task)
                 }
             }
-        }, 5000)
+        }, 1000)
     }
 
-    whatIsOn(x, y){
-        this.queue.push({type:'getPosData', x:x, y:y})
-    }
-
-    moveMeTo(target){
-        this.queue.push({type:'moveMeTo', target:target})
+    sendCommand(data = {}){
+        this.queue.push(data)
     }
 }
