@@ -508,7 +508,7 @@ function checkWhatToDo(bot, target){
     }
 }
 
-function mapToGridWithManhattanDistances(target, map){
+function mapToGrid(target, map){
     let grid = []
     for (let x = 0; x < mapSizeX; x++) {
         let row = []
@@ -536,7 +536,7 @@ function calculateManhattanDistance(a, b){
 }
 
 function findShortestPath(bot, target, map){
-    let grid = mapToGridWithManhattanDistances(target, map)
+    let grid = mapToGrid(target, map)
     bot['path'] = []
     let queue = [bot]
     while(queue.length > 0){
