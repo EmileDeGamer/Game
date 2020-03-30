@@ -367,18 +367,18 @@ let pieceSize = 10 //in pixels
 //#region classes
 let EnergyGenerator = require("./classes/EnergyGeneratorBase")
 
-let users = fs.readdirSync('./classes/bots/')
+let readedBotClasses = fs.readdirSync('./classes/bots/')
 let botClasses = []
 reloadBotClasses()
 
 function reloadBotClasses(){
-    users = fs.readdirSync('./classes/bots/')
+    readedBotClasses = fs.readdirSync('./classes/bots/')
     botClasses = []
-    for (let i = 0; i < users.length; i++) {
-        let userBotFolder = fs.readdirSync('./classes/bots/' + users[i])
+    for (let i = 0; i < readedBotClasses.length; i++) {
+        let userBotFolder = fs.readdirSync('./classes/bots/' + readedBotClasses[i])
         for (let x = 0; x < userBotFolder.length; x++) {
             if(userBotFolder[x] == 'main.js'){
-                botClasses.push({main:'./classes/bots/' + users[i] + '/' + userBotFolder[x],username:users[i]})
+                botClasses.push({main:'./classes/bots/' + readedBotClasses[i] + '/' + userBotFolder[x],username:readedBotClasses[i]})
             }
         }
     }
@@ -644,8 +644,13 @@ console.log("Generating bots and finding their shortest path took " + (d2.getTim
 //#endregion
 
 //#region realtime updates
+let users = []
+
 io.on('connection', function(socket){
     console.log('connection made!')  
+    socket.on('iAm', function(data){
+        users.push({username:data['username'],socket:socket})
+    })
     socket.emit('createMap', {maxX: maxX, maxY: maxY, pieceSize: pieceSize})
     socket.on('createBot', function(data){
         for (let i = 0; i < botClasses.length; i++) {
@@ -681,9 +686,9 @@ io.on('connection', function(socket){
     //#region disconnecting for testing, later bots when they die they will be removed from array
     socket.on('disconnect', function(){
         console.log('disconnected! :(')
-        /*if(bots.map(function(e) { return e.socket; }).indexOf(socket) !== -1){
-            bots.splice(bots.map(function(e) { return e.socket; }).indexOf(socket), 1)
-        }*/
+        if(users.map(function(u) { return u.socket; }).indexOf(socket) !== -1){
+            users.splice(users.map(function(u) { return u.socket; }).indexOf(socket), 1)
+        }
     })
     //#endregion
 

@@ -32,6 +32,7 @@ button.onclick = function(){
 
 socket.on('connect', function(){
     console.log('connection made!')
+    socket.emit('iAm', {username:username})
 })
 
 socket.on('ownedBots', function(data){
