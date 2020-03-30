@@ -9,6 +9,31 @@ let io = require('socket.io')(http)
 let bcrypt = require('bcryptjs')
 let session = require('express-session')
 let fs = require('fs')
+let multer  = require('multer')
+let storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, './uploads');
+     },
+    filename: function (req, file, cb) {
+        cb(null , file.originalname);
+    }
+})
+let upload = multer({ storage:storage })
+let AdmZip = require('adm-zip')
+
+let deleteFolderRecursive = function(path) {
+    if (fs.existsSync(path)) {
+        fs.readdirSync(path).forEach((file) => {
+            const curPath = path + '/' + file
+            if (fs.lstatSync(curPath).isDirectory()) {
+                deleteFolderRecursive(curPath)
+            } else {
+                fs.unlinkSync(curPath)
+            }
+        })
+        fs.rmdirSync(path)
+    }
+}
 
 //#region database functions
 let con = mysql.createConnection({
@@ -293,13 +318,39 @@ app.post('/register', function(req, res){
         res.render("register", {errors: errors, input: userInput})
     }
 })
+
+app.post('/uploadBot', upload.single('uploadedBot'), function(req, res){
+    console.log(req.file)
+    if(req.file['mimetype'] == 'application/x-zip-compressed'){
+        let newName = req.file.originalname.replace('.zip','')
+        if(fs.existsSync('./classes/bots/'+newName)){
+            deleteFolderRecursive('./classes/bots/'+newName)
+            let zip = new AdmZip(req.file.path)
+            zip.extractAllTo('./classes/bots/'+newName, true)
+            reloadBotClasses()
+            fs.unlinkSync('./uploads/'+req.file.originalname)
+            res.redirect('/')
+        }
+        else{
+            let zip = new AdmZip(req.file.path)
+            zip.extractAllTo('./classes/bots/'+newName, true)
+            reloadBotClasses()
+            fs.unlinkSync('./uploads/'+req.file.originalname)
+            res.redirect('/')
+        }
+    }
+    else{
+        console.log('File must be a zip')
+        fs.unlinkSync('./uploads/'+req.file.originalname)
+        res.redirect('/')
+    }
+})
 //#endregion
 
 http.listen(process.env.PORT, function(){
     console.log("listening on " + process.env.PORT)
 })
 //#endregion
-
 //#endregion
 
 //#region game vars
@@ -318,19 +369,26 @@ let EnergyGenerator = require("./classes/EnergyGeneratorBase")
 
 let users = fs.readdirSync('./classes/bots/')
 let botClasses = []
-for (let i = 0; i < users.length; i++) {
-    let userBotFolder = fs.readdirSync('./classes/bots/' + users[i])
-    for (let x = 0; x < userBotFolder.length; x++) {
-        if(userBotFolder[x] == 'main.js'){
-            botClasses.push({main:'./classes/bots/' + users[i] + '/' + userBotFolder[x],username:users[i]})
+reloadBotClasses()
+
+function reloadBotClasses(){
+    users = fs.readdirSync('./classes/bots/')
+    botClasses = []
+    for (let i = 0; i < users.length; i++) {
+        let userBotFolder = fs.readdirSync('./classes/bots/' + users[i])
+        for (let x = 0; x < userBotFolder.length; x++) {
+            if(userBotFolder[x] == 'main.js'){
+                botClasses.push({main:'./classes/bots/' + users[i] + '/' + userBotFolder[x],username:users[i]})
+            }
         }
+    }
+
+    for (let i = 0; i < botClasses.length; i++) {
+        botClasses[i]['main'] = require(botClasses[i]['main'])
+        console.log(botClasses[i]['username'])
     }
 }
 
-for (let i = 0; i < botClasses.length; i++) {
-    botClasses[i]['main'] = require(botClasses[i]['main'])
-    console.log(botClasses[i]['username'])
-}
 //#endregion
 
 //#region generate game entities
@@ -380,10 +438,6 @@ function checkOnDuplicateName(bot, attempt = 0){
         checkOnDuplicateName(bot, attempt+=1)
     }
 }   
-
-/*for (let x = 0; x < bots.length; x++) {
-    moveEntityTowardsTarget(bots[x], generators[Math.floor(Math.random() * generators.length)], foreground, false)
-}*/
 //#endregion
 
 //#region pathfinding
@@ -610,11 +664,6 @@ io.on('connection', function(socket){
                 bot['returnedData'] = []
                 bot['spawn'] = spawn
                 bot['ready'] = true
-                /*bot['mapSizeX'] = mapSizeX
-                bot['mapSizeY'] = mapSizeY
-                foreground[bot['x']][bot['y']] = bot
-                bot['map'] = foreground
-                */
                 checkOnDuplicateName(bot)
                 bot.init()
                 bots.push(bot)

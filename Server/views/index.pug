@@ -12,7 +12,7 @@ div(class="content")
     div(id="hoverDisplay")
     div(id="hoveredEntityDisplay")
     button(id="createBot", style="float:left") Create Bot
-    form(action="uploadBot", method="post", id="uploadBot")
-        input(type="file", name="bot")
+    form(action="uploadBot", method="post", id="uploadBot",  enctype="multipart/form-data")
+        input(type="file", name="uploadedBot")
         button(type="submit") Upload
 include ./layout/footer.pug
