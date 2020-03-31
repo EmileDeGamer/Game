@@ -4,24 +4,41 @@ body{
     user-select: none;
 }
 
-#hoveredEntityDisplay{  
+#stats{
     grid-column: 1/5;
     grid-row: 1;
 }
 
-#hoverDisplay{
+#hoveredEntityDisplay{  
     grid-column: 1/5;
     grid-row: 2;
+    margin: auto;
+}
+
+#hoverDisplay{
+    grid-column: 1/5;
+    grid-row: 3;
+    margin: auto;
 }
 
 #selectedDisplay{
     grid-column: 1/5;
-    grid-row: 3;
+    grid-row: 4/6;
+    margin: auto;
 }
 
 #createBot{
     grid-column: 1/5;
-    grid-row: 4;
+    grid-row: 7;
+    height: 25px;
+    width: 250px;
+    margin: auto;
+}
+
+#uploadBot{
+    grid-row: 8;
+    grid-column: 1/5;
+    margin: auto;
 }
 
 #game{
@@ -40,13 +57,30 @@ body{
     }
 }
 
-#uploadBot{
-    grid-row: 5;
-    grid-column: 1/5;
-}
-
 header{
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    grid-template-rows: repeat(2, auto);
+    h1{
+        background-color: red;
+        color: white;
+        padding: 20px;
+        margin: 0;
+        text-align: center;
+        grid-row: 1;
+        grid-column: span 3;
+    }
+    #right{
+        grid-column: 3;
+        text-align: right;
+        grid-row: 2;
+    }
+    #middle{
+        grid-column: 2;
+        grid-row: 2;
+    }
     ul{
+        padding: 0;
         list-style: none;
         li{
             a{
@@ -75,4 +109,6 @@ footer{
     position: relative;
     bottom: 0;
     box-sizing: border-box;
+    background-color: red;
+    color: white;
 }

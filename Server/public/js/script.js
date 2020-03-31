@@ -23,20 +23,23 @@ let mapSizeY
 //#endregion
 
 let button = document.getElementById('createBot')
-
+let selectedObject = {}
 let socket = io()
 
 button.onclick = function(){
     socket.emit('createBot', {username:username})
 }
 
+updateStats()
+
 socket.on('connect', function(){
     console.log('connection made!')
+    selectedDisplay.innerText = ''
     socket.emit('iAm', {username:username})
 })
 
 socket.on('ownedBots', function(data){
-    console.log(data)
+    updateStats(data)
 })
 
 socket.on('createMap', function(data){
@@ -97,9 +100,11 @@ hoverground.onmousedown = function (e) {
         selectedDisplay.innerHTML = ''
     }
     else{
-        let dataToDisplay = foregroundMap[roundedX][roundedY]
-        dataToDisplay['map'] = undefined
-        selectedDisplay.innerHTML = JSON.stringify(dataToDisplay)
+        selectedDisplay.innerHTML = ''
+        selectedObject = foregroundMap[roundedX][roundedY]
+        for (const [key, value] of Object.entries(selectedObject)) {
+            selectedDisplay.innerHTML += key + ": " + value + "<br>"
+        }
     }
 }
 
@@ -138,26 +143,36 @@ hoverground.onmousemove = function (e) {
 
 //updating realtime data of selected entity
 setInterval(() => {
-    let selectedDisplayText = selectedDisplay.innerText
-    if(selectedDisplayText != ''){
-        let object = JSON.parse(selectedDisplayText)
-        if(JSON.stringify(object) == "{}"){
+    if(selectedDisplay.innerText != ''){
+        selectedDisplay.innerHTML = ''
+        if(JSON.stringify(selectedObject) == "{}"){
             selectedDisplay.innerHTML = ''
         }
-        else if(object['type'] == 'bot'){
+        else if(selectedObject['type'] == 'bot'){
             for (let i = 0; i < foregroundMap.length; i++) {
                 for (let x = 0; x < foregroundMap[i].length; x++) {
-                    if(foregroundMap[i][x]['name'] == object['name']){
-                        let dataToDisplay = foregroundMap[i][x]
-                        dataToDisplay['map'] = undefined
-                        selectedDisplay.innerHTML = JSON.stringify(dataToDisplay)
+                    if(foregroundMap[i][x]['name'] == selectedObject['name']){
+                        for (const [key, value] of Object.entries(foregroundMap[i][x])) {
+                            selectedDisplay.innerHTML += key + ": " + value + "<br>"
+                        }
                         break
                     }
                 }
             }
         }
-        else if(object['type'] != 'bot'){
-            selectedDisplay.innerHTML = JSON.stringify(foregroundMap[object['x']][object['y']])
+        else if(selectedObject['type'] != 'bot'){
+            for (const [key, value] of Object.entries(foregroundMap[selectedObject['x']][selectedObject['y']])) {
+                selectedDisplay.innerHTML += key + ": " + value + "<br>"
+            }
         }
     }
 }, 1000/10)
+
+function updateStats(ownedBots = []){
+    stats.innerHTML = "Stats:<br>"
+    stats.innerHTML += 'Username: ' + username + "<br>"
+    stats.innerHTML += 'Level: ' + level + "<br>"
+    stats.innerHTML += 'XP: ' + xp + "<br>"
+    stats.innerHTML += 'Currency: ' + currency + "<br>"
+    stats.innerHTML += 'Owned Bots: ' + ownedBots.length + "<br>"
+}

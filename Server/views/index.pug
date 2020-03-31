@@ -3,11 +3,15 @@ script(src="socket.io/socket.io.js", defer)
 script(src="js/script.js", defer)
 script(defer).
     let username = "#{userData['username']}"
+    let level = "#{userData['level']}"
+    let xp = "#{userData['xp']}"
+    let currency = "#{userData['currency']}"
 div(class="content")
     div(id="game", style="position: relative;")
         canvas(id="background", style="z-index: 0;")
         canvas(id="foreground", style="z-index: 1;")
         canvas(id="hoverground", style="z-index: 2;")
+    div(id="stats")
     div(id="selectedDisplay")
     div(id="hoverDisplay")
     div(id="hoveredEntityDisplay")
