@@ -448,7 +448,7 @@ function moveEntityTowardsTarget(bot, target, map, moveOnTheTarget){
         console.log('unreachable target')
     }
     else{
-        let currentCoords = {x:bot['x'], y:bot['y']}
+        /*let currentCoords = {x:bot['x'], y:bot['y']}
         for (let i = 0; i < route.length; i++) {
             if(route[i] == 'up'){
                 currentCoords['y']--
@@ -466,7 +466,7 @@ function moveEntityTowardsTarget(bot, target, map, moveOnTheTarget){
                 currentCoords['x']--
                 background[currentCoords['x']][currentCoords['y']]['color'] = 'green'
             }
-        }
+        }*/
         setTimeout(function(){botBehaviour(0, moveOnTheTarget, route, bot, target)}, 1000 / bot['speed']) 
     }
 }
@@ -502,7 +502,6 @@ function movementController(bot, route){
         else{
             bot['speed'] = 10
         }
-        //background[bot['x']][bot['y']]['color'] = 'green'
     }
     else if (route == 'right'){
         bot['x']++
@@ -512,7 +511,6 @@ function movementController(bot, route){
         else{
             bot['speed'] = 10
         }
-        //background[bot['x']][bot['y']]['color'] = 'green'
     }
     else if (route == 'down'){
         bot['y']++
@@ -522,7 +520,6 @@ function movementController(bot, route){
         else{
             bot['speed'] = 10
         }
-        //background[bot['x']][bot['y']]['color'] = 'green'
     }
     else if (route == 'left'){
         bot['x']--
@@ -532,7 +529,6 @@ function movementController(bot, route){
         else{
             bot['speed'] = 10
         }
-        //background[bot['x']][bot['y']]['color'] = 'green'
     }
 }
 
@@ -610,7 +606,7 @@ function findShortestPath(bot, target, map){
             }
             else if(newLocation['type'] == 'v'){
                 grid[newLocation['x']][newLocation['y']]['type'] = 's'
-                background[newLocation['x']][newLocation['y']]['color'] = 'blue'
+                //background[newLocation['x']][newLocation['y']]['color'] = 'blue'
                 newLocation['manhattan'] = calculateManhattanDistance(newLocation, target)
                 queue.push(newLocation)
             }   
