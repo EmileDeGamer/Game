@@ -2,10 +2,10 @@ include ./layout/header.pug
 script(src="socket.io/socket.io.js", defer)
 script(src="js/script.js", defer)
 script(defer).
-    let username = "#{userData['username']}"
-    let level = "#{userData['level']}"
-    let xp = "#{userData['xp']}"
-    let currency = "#{userData['currency']}"
+    let userData = {}
+each val, index in userData
+    script(defer).
+        userData['#{index}'] = '#{val}'
 div(class="content")
     div(id="game", style="position: relative;")
         canvas(id="background", style="z-index: 0;")

@@ -27,7 +27,7 @@ let selectedObject = {}
 let socket = io()
 
 button.onclick = function(){
-    socket.emit('createBot', {username:username})
+    socket.emit('createBot', {username:userData['username']})
 }
 
 updateStats()
@@ -35,7 +35,7 @@ updateStats()
 socket.on('connect', function(){
     console.log('connection made!')
     selectedDisplay.innerText = ''
-    socket.emit('iAm', {username:username})
+    socket.emit('iAm', {username:userData['username']})
 })
 
 socket.on('ownedBots', function(data){
@@ -170,9 +170,10 @@ setInterval(() => {
 
 function updateStats(ownedBots = []){
     stats.innerHTML = "Stats:<br>"
-    stats.innerHTML += 'Username: ' + username + "<br>"
-    stats.innerHTML += 'Level: ' + level + "<br>"
-    stats.innerHTML += 'XP: ' + xp + "<br>"
-    stats.innerHTML += 'Currency: ' + currency + "<br>"
+    for (const [key, value] of Object.entries(userData)) {
+        if(key != 'name' && key != 'email'){
+            stats.innerHTML += key + ": " + value + "<br>"
+        }
+    }
     stats.innerHTML += 'Owned Bots: ' + ownedBots.length + "<br>"
 }
