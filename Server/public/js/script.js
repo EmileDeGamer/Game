@@ -56,6 +56,10 @@ socket.on('createMap', function(data){
     hoverground.height = mapSizeY*pieceSize
 })
 
+socket.on('errorMessage', function(data){
+    alert(data)
+})
+
 socket.on('updateMap', function(data){
     if(data['name'] == 'foreground'){
         foregroundMap = data['map']

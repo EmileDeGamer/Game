@@ -18,7 +18,7 @@ module.exports = class Bot {
 
     init(){
         console.log(this['owner'] + this['name'])
-        this.sendCommand({x:0,y:0})
+        this.sendCommand({pizza:0})
         
         setInterval(() => {
             if(this.returnedData.length > 0){

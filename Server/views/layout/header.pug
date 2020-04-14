@@ -11,5 +11,6 @@ html
                 li
                     a(href="game") Game
             ul(id="right")
-                li
-                    a(href="logout") Logout
+                if userData !== undefined
+                    li
+                        a(href="logout") Logout

@@ -731,10 +731,14 @@ io.on('connection', function(socket){
                     }
                     else{
                         if(foreground[command['x']][command['y']]['name'] == bots[i]['name'] && foreground[command['x']][command['y']]['owner'] == bots[i]['owner']){
-                            //returnDataToBot(bots[i], 'you')
+                            let user = users.find(user => user.username === bots[i]['owner'])
+                            user.socket.emit('errorMessage', 'you found yourself')
+                            bots.splice(i, 1)
                         }
                         else if(JSON.stringify(foreground[command['x']][command['y']]) == "{}"){
-                            //returnDataToBot(bots[i], 'nothing')
+                            let user = users.find(user => user.username === bots[i]['owner'])
+                            user.socket.emit('errorMessage', 'there is nothing')
+                            bots.splice(i, 1)
                         }
                         else{
                             returnDataToBot(bots[i], foreground[command['x']][command['y']])
@@ -742,7 +746,9 @@ io.on('connection', function(socket){
                     }
                 }
                 else{
-                    //returnDataToBot(bots[i], 'you gave no x and y')
+                    let user = users.find(user => user.username === bots[i]['owner'])
+                    user.socket.emit('errorMessage', 'you gave no x and y')
+                    bots.splice(i, 1)
                 }
             }
         }
