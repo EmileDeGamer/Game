@@ -741,16 +741,34 @@ io.on('connection', function(socket){
                             let user = users.find(user => user.username === bots[i]['owner'])
                             user.socket.emit('errorMessage', 'you found yourself')
                             bots.splice(i, 1)
+                            for (let i = 0; i < bots.length; i++) {
+                                if(bots[i]['owner'] == user.username){
+                                    ownedBots.push(bots[i])
+                                }
+                            }
+                            user.socket.emit('ownedBots', ownedBots)
                         }
                         else if(JSON.stringify(foreground[command['x']][command['y']]) == "{}"){
                             let user = users.find(user => user.username === bots[i]['owner'])
                             user.socket.emit('errorMessage', 'there is nothing')
                             bots.splice(i, 1)
+                            for (let i = 0; i < bots.length; i++) {
+                                if(bots[i]['owner'] == user.username){
+                                    ownedBots.push(bots[i])
+                                }
+                            }
+                            user.socket.emit('ownedBots', ownedBots)
                         }
                         else if(foreground[command['x']][command['y']]['type'] == 'wall'){
                             let user = users.find(user => user.username === bots[i]['owner'])
                             user.socket.emit('errorMessage', 'that\'s a wall')
                             bots.splice(i, 1)
+                            for (let i = 0; i < bots.length; i++) {
+                                if(bots[i]['owner'] == user.username){
+                                    ownedBots.push(bots[i])
+                                }
+                            }
+                            user.socket.emit('ownedBots', ownedBots)
                         }
                         else{
                             returnDataToBot(bots[i], foreground[command['x']][command['y']])
@@ -761,6 +779,12 @@ io.on('connection', function(socket){
                     let user = users.find(user => user.username === bots[i]['owner'])
                     user.socket.emit('errorMessage', 'you gave no x and y')
                     bots.splice(i, 1)
+                    for (let i = 0; i < bots.length; i++) {
+                        if(bots[i]['owner'] == user.username){
+                            ownedBots.push(bots[i])
+                        }
+                    }
+                    user.socket.emit('ownedBots', ownedBots)
                 }
             }
         }
