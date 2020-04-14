@@ -159,7 +159,9 @@ app.use(express.static('public'))
 //#region pages
 app.get('/', function(req, res){
     if(req.session.user != null){
-        res.render("index", {userData: req.session.user})
+        let errors = req.session.errors
+        delete req.session.errors
+        res.render("index", {userData: req.session.user, errors:errors})
     }
     else{
         res.redirect('/login')
@@ -320,7 +322,6 @@ app.post('/register', function(req, res){
 })
 
 app.post('/uploadBot', upload.single('uploadedBot'), function(req, res){
-    console.log(req.file)
     if(req.file['mimetype'] == 'application/x-zip-compressed'){
         let newName = req.file.originalname.replace('.zip','')
         if(fs.existsSync('./classes/bots/'+newName)){
@@ -340,8 +341,8 @@ app.post('/uploadBot', upload.single('uploadedBot'), function(req, res){
         }
     }
     else{
-        console.log('File must be a zip')
         fs.unlinkSync('./uploads/'+req.file.originalname)
+        req.session.errors = ['File must be a zip']
         res.redirect('/')
     }
 })

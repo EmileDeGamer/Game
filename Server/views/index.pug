@@ -6,6 +6,10 @@ script(defer).
 each val, index in userData
     script(defer).
         userData['#{index}'] = '#{val}'
+if errors !== undefined
+    ul
+        each val in errors
+            li= val
 div(class="content")
     div(id="game", style="position: relative;")
         canvas(id="background", style="z-index: 0;")
@@ -17,6 +21,6 @@ div(class="content")
     div(id="hoveredEntityDisplay")
     button(id="createBot", style="float:left") Create Bot
     form(action="uploadBot", method="post", id="uploadBot",  enctype="multipart/form-data")
-        input(type="file", name="uploadedBot")
+        input(type="file", name="uploadedBot" required)
         button(type="submit") Upload
 include ./layout/footer.pug

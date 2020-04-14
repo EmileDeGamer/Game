@@ -3,21 +3,17 @@ module.exports = class Bot {
         this.name //bots own name
         this.x //the current x
         this.y //the current y
-        this.owner //maybe a user with different name than bot when using accounts
-        this.type //for checking client side how to update the selected entity
+        this.owner //your own username of your account
+        this.type //automatic set to bot
         this.color
         this.energy
         this.maxEnergy
         this.queue //the queue for all the given commands
         this.returnedData //the data from the queued commands
-        //this.map
-        //this.mapSizeX
-        //this.mapSizeY
-        this.spawn
+        this.spawn //will be set to the middle of map
     }    
 
     init(){
-        console.log(this['owner'] + this['name'])
         this.sendCommand({pizza:0})
         
         setInterval(() => {
@@ -30,6 +26,7 @@ module.exports = class Bot {
         }, 1000)
     }
 
+    //sending data must be an object
     sendCommand(data = {}){
         this.queue.push(data)
     }
