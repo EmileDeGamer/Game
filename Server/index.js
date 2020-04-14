@@ -741,6 +741,7 @@ io.on('connection', function(socket){
                             let user = users.find(user => user.username === bots[i]['owner'])
                             user.socket.emit('errorMessage', 'you found yourself')
                             bots.splice(i, 1)
+                            let ownedBots = []
                             for (let i = 0; i < bots.length; i++) {
                                 if(bots[i]['owner'] == user.username){
                                     ownedBots.push(bots[i])
@@ -752,6 +753,7 @@ io.on('connection', function(socket){
                             let user = users.find(user => user.username === bots[i]['owner'])
                             user.socket.emit('errorMessage', 'there is nothing')
                             bots.splice(i, 1)
+                            let ownedBots = []
                             for (let i = 0; i < bots.length; i++) {
                                 if(bots[i]['owner'] == user.username){
                                     ownedBots.push(bots[i])
@@ -763,6 +765,7 @@ io.on('connection', function(socket){
                             let user = users.find(user => user.username === bots[i]['owner'])
                             user.socket.emit('errorMessage', 'that\'s a wall')
                             bots.splice(i, 1)
+                            let ownedBots = []
                             for (let i = 0; i < bots.length; i++) {
                                 if(bots[i]['owner'] == user.username){
                                     ownedBots.push(bots[i])
@@ -779,6 +782,7 @@ io.on('connection', function(socket){
                     let user = users.find(user => user.username === bots[i]['owner'])
                     user.socket.emit('errorMessage', 'you gave no x and y')
                     bots.splice(i, 1)
+                    let ownedBots = []
                     for (let i = 0; i < bots.length; i++) {
                         if(bots[i]['owner'] == user.username){
                             ownedBots.push(bots[i])
