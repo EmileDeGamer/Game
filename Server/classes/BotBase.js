@@ -14,8 +14,6 @@ module.exports = class Bot {
     }    
 
     init(){
-        this.sendCommand({pizza:0})
-        
         setInterval(() => {
             if(this.returnedData.length > 0){
                 let task = this.returnedData.shift()

@@ -328,17 +328,16 @@ app.post('/uploadBot', upload.single('uploadedBot'), function(req, res){
             deleteFolderRecursive('./classes/bots/'+newName)
             let zip = new AdmZip(req.file.path)
             zip.extractAllTo('./classes/bots/'+newName, true)
-            reloadBotClasses()
             fs.unlinkSync('./uploads/'+req.file.originalname)
             res.redirect('/')
         }
         else{
             let zip = new AdmZip(req.file.path)
             zip.extractAllTo('./classes/bots/'+newName, true)
-            reloadBotClasses()
             fs.unlinkSync('./uploads/'+req.file.originalname)
             res.redirect('/')
         }
+        reloadBotClasses()
     }
     else{
         fs.unlinkSync('./uploads/'+req.file.originalname)
@@ -355,7 +354,7 @@ http.listen(process.env.PORT, function(){
 //#endregion
 
 //#region game vars
-let background = [], foreground = [], bots = [], generators = []
+let background = [], foreground = [], bots = [], generators = [], entities = []
 let maxX = 99
 let maxY = 99
 let mapSizeX = maxX + 1
@@ -368,8 +367,8 @@ let pieceSize = 10 //in pixels
 //#region classes
 let EnergyGenerator = require("./classes/EnergyGeneratorBase")
 
-let readedBotClasses = fs.readdirSync('./classes/bots/')
-let botClasses = []
+let readedBotClasses
+let botClasses
 reloadBotClasses()
 
 function reloadBotClasses(){
@@ -407,9 +406,13 @@ for (let i = 0; i < mapSizeX; i++) {
 }
 let d2 = new Date()
 console.log("Generating foreground and background took " + (d2.getTime() - d1.getTime()) + " ms")
-console.log("Generating energy generators...")
+console.log("Generating entities...")
 d1 = new Date()
-for (let i = 0; i < 2500; i++) { //testing amount
+for (let i = 0; i < 1500; i++) {
+    let wall = {x:0,y:0,color:'orange',type:'wall',name:'wall'}
+    generateItemOnAvailablePlace(wall, entities)
+}
+for (let i = 0; i < 250; i++) { //testing amount
     let energyGenerator = new EnergyGenerator(0, 0, 'Energy Generator','purple', Math.floor(Math.random() * 5), Math.floor(Math.random() * 100)+1, 0)
     generateItemOnAvailablePlace(energyGenerator, generators)
 }
@@ -426,7 +429,7 @@ function generateItemOnAvailablePlace(entity, array){
     }
 }
 d2 = new Date()
-console.log("Generating energy generators took " + (d2.getTime() - d1.getTime()) + " ms")
+console.log("Generating entities took " + (d2.getTime() - d1.getTime()) + " ms")
 
 console.log("Creating bots...")
 d1 = new Date()
@@ -703,6 +706,9 @@ io.on('connection', function(socket){
             }
             foreground.push(foregroundRow)
         }
+        for (let i = 0; i < entities.length; i++) {
+            foreground[entities[i]['x']][entities[i]['y']] = entities[i]
+        }
         for (let i = 0; i < generators.length; i++) {
             foreground[generators[i]['x']][generators[i]['y']] = generators[i]
         }
@@ -739,6 +745,11 @@ io.on('connection', function(socket){
                         else if(JSON.stringify(foreground[command['x']][command['y']]) == "{}"){
                             let user = users.find(user => user.username === bots[i]['owner'])
                             user.socket.emit('errorMessage', 'there is nothing')
+                            bots.splice(i, 1)
+                        }
+                        else if(foreground[command['x']][command['y']]['type'] == 'wall'){
+                            let user = users.find(user => user.username === bots[i]['owner'])
+                            user.socket.emit('errorMessage', 'that\'s a wall')
                             bots.splice(i, 1)
                         }
                         else{
