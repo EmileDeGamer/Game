@@ -144,6 +144,12 @@ header ul li a:hover {
       grid-template-rows: repeat(10, 100px);
 }
 
+.content form {
+  grid-column: span 15;
+  grid-row: span 10;
+  margin: auto;
+}
+
 footer {
   border-top: 1px solid;
   width: 100%;

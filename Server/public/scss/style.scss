@@ -100,6 +100,11 @@ header{
     display: grid;
     grid-template-columns: repeat(15, 100px);
     grid-template-rows: repeat(10, 100px);
+    form{
+        grid-column: span 15;
+        grid-row: span 10;
+        margin: auto;
+    }
 }
 
 footer{

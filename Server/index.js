@@ -337,7 +337,9 @@ app.post('/uploadBot', upload.single('uploadedBot'), function(req, res){
             fs.unlinkSync('./uploads/'+req.file.originalname)
             res.redirect('/')
         }
-        reloadBotClasses()
+        setTimeout(() => {
+            reloadBotClasses()
+        }, 5000)
     }
     else{
         fs.unlinkSync('./uploads/'+req.file.originalname)

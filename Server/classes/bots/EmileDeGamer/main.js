@@ -10,7 +10,7 @@ module.exports = class Bot extends BotBase{
         super()
         let readyToStart = setInterval(() => {
             if(this.ready){
-                this.sendCommand({x:8,y:3})
+                this.sendCommand({x:20,y:1})
                 clearInterval(readyToStart)
             }
         }, 100)
